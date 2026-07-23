@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.gr00ze.diagram3D.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "DiagramPacketHandlerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
