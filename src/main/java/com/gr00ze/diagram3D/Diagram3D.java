@@ -22,7 +22,7 @@ public class Diagram3D
     // Define mod id in a common place for everything to reference
     public static final String MOD_ID = "diagram3d";
     // Directly reference a slf4j logger
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     public Diagram3D(IEventBus modEventBus, ModContainer modContainer)
     {
@@ -31,15 +31,4 @@ public class Diagram3D
 
 
 
-    @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class ClientModEvents
-    {
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event)
-        {
-            // Some client setup code
-            LOGGER.info("HELLO FROM CLIENT SETUP");
-            LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
-        }
-    }
 }
