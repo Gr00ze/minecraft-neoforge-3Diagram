@@ -18,8 +18,9 @@ import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import dev.ryanhcode.sable.sublevel.SubLevel;
 import org.jetbrains.annotations.Nullable;
+import foundry.veil.api.network.VeilPacketManager;
 
-import java.util.List;
+
 
 import static dev.simulated_team.simulated.content.entities.diagram.screen.DiagramScreen.UPDATE_REQUEST_INTERVAL;
 
@@ -53,7 +54,7 @@ public class Diagram3DClient {
         {
             if (ticksWithoutUpdate++ > UPDATE_REQUEST_INTERVAL) {
                 ticksWithoutUpdate = 0;
-                //VeilPacketManager.server().sendPacket(new CustomPacketPayload[]{new RequestDiagramDataPacket(subLevel.getUniqueId())});
+                VeilPacketManager.server().sendPacket(new CustomPacketPayload[]{new RequestDiagramDataPacket(subLevel.getUniqueId())});
             }
 
         }
