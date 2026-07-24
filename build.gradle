@@ -182,6 +182,7 @@ dependencies {
     runtimeOnly files("libs/sable-neoforge-1.21.1-1.2.2.jar")
     compileOnly files("libs/sable-neoforge-1.21.1-1.2.2.jar")
     compileOnly files("libs/sable-companion-common-1.21.1-1.6.0.jar")
+    compileOnly files('libs/veil-neoforge-1.21.1-4.0.0.jar')
 
 
 
