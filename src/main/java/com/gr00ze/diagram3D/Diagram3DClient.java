@@ -1,11 +1,15 @@
 package com.gr00ze.diagram3D;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.ryanhcode.sable.Sable;
 import dev.ryanhcode.sable.companion.math.BoundingBox3d;
 import dev.simulated_team.simulated.network.packets.contraption_diagram.DiagramDataPacket;
 import dev.simulated_team.simulated.network.packets.contraption_diagram.RequestDiagramDataPacket;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -14,11 +18,13 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import dev.ryanhcode.sable.sublevel.SubLevel;
 import org.jetbrains.annotations.Nullable;
 import foundry.veil.api.network.VeilPacketManager;
+import org.joml.Matrix4f;
 
 
 import java.util.ArrayDeque;
@@ -115,12 +121,98 @@ public class Diagram3DClient {
         UUID completed = diagramRequestQueue.poll();
 
 
+        // TODO Add server data saving
 
 
         waitingForResponse = false;
 
 
         sendNextRequest();
+    }
 
+
+
+
+    @SubscribeEvent
+    public static void onRenderLevelStage(RenderLevelStageEvent event){
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
+            return;
+
+        PoseStack pose = event.getPoseStack();
+
+        Minecraft mc = Minecraft.getInstance();
+
+        Vec3 camera = mc.gameRenderer
+            .getMainCamera()
+            .getPosition();
+
+        pose.pushPose();
+
+        pose.translate(
+            -camera.x,
+            -camera.y,
+            -camera.z
+        );
+
+        Vec3 start = new Vec3(0, 100, 0);
+        Vec3 end = new Vec3(5, 100, 0);
+
+
+        MultiBufferSource.BufferSource buffer =
+            mc.renderBuffers().bufferSource();
+
+        VertexConsumer consumer =
+            buffer.getBuffer(RenderType.lines());
+
+        drawLine(
+            pose,
+            consumer,
+            start,
+            end
+        );
+
+
+        buffer.endBatch(RenderType.lines());
+
+        pose.popPose();
+    }
+
+    private static void drawLine(
+        PoseStack poseStack,
+        VertexConsumer consumer,
+        Vec3 from,
+        Vec3 to
+    )
+    {
+        Matrix4f matrix = poseStack.last().pose();
+
+        consumer.addVertex(
+                matrix,
+                (float)from.x,
+                (float)from.y,
+                (float)from.z
+            )
+            .setColor(255, 0, 0, 255)
+            .setNormal(
+                poseStack.last(),
+                0,
+                1,
+                0
+            );
+
+
+        consumer.addVertex(
+                matrix,
+                (float)to.x,
+                (float)to.y,
+                (float)to.z
+            )
+            .setColor(255, 0, 0, 255)
+            .setNormal(
+                poseStack.last(),
+                0,
+                1,
+                0
+            );
     }
 }
