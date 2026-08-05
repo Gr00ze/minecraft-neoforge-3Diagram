@@ -21,6 +21,9 @@ import org.jetbrains.annotations.Nullable;
 import foundry.veil.api.network.VeilPacketManager;
 
 
+import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.UUID;
 
 import static dev.simulated_team.simulated.content.entities.diagram.screen.DiagramScreen.UPDATE_REQUEST_INTERVAL;
 
@@ -39,7 +42,11 @@ public class Diagram3DClient {
         Diagram3D.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
     }
 
-    private static float ticksWithoutUpdate = 0;
+    private static final Queue<UUID> diagramRequestQueue = new ArrayDeque<>();
+    private static int ticksWithoutUpdate = 0;
+    private static boolean waitingForResponse = false;
+    private static final int UPDATE_REQUEST_INTERVAL = 100;
+
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event)
     {
@@ -48,20 +55,72 @@ public class Diagram3DClient {
         if (mc.level == null || mc.player == null)
             return;
 
-        Iterable<SubLevel> subLevels = Sable.HELPER.getAllIntersecting(mc.level, new BoundingBox3d());
+        ticksWithoutUpdate++;
+
+        //Still elaborating requests
+        if (!diagramRequestQueue.isEmpty())
+            return;
+
+        //Not the time yet
+        if (ticksWithoutUpdate <= UPDATE_REQUEST_INTERVAL)
+            return;
+
+        //It's time!
+        ticksWithoutUpdate = 0;
+
+        double R = 5;
+        LocalPlayer player = mc.player;
+
+
+        Iterable<SubLevel> subLevels = Sable.HELPER.getAllIntersecting(mc.level, new BoundingBox3d(
+            player.getX() - R,
+            player.getY() - R,
+            player.getZ() - R,
+            player.getX() + R,
+            player.getY() + R,
+            player.getZ() + R
+        ));
 
         for (SubLevel subLevel : subLevels)
         {
-            if (ticksWithoutUpdate++ > UPDATE_REQUEST_INTERVAL) {
-                ticksWithoutUpdate = 0;
-                VeilPacketManager.server().sendPacket(new CustomPacketPayload[]{new RequestDiagramDataPacket(subLevel.getUniqueId())});
-            }
-
+            diagramRequestQueue.add(subLevel.getUniqueId());
         }
+        //Send the first packet
+        sendNextRequest();
+    }
+
+    private static void sendNextRequest()
+    {
+        if (waitingForResponse)
+            return;
+
+        UUID id = diagramRequestQueue.peek();
+
+        if (id == null) //Should never happen
+            return;
+
+
+        waitingForResponse = true;
+
+        VeilPacketManager.server()
+            .sendPacket(new RequestDiagramDataPacket(id));
     }
 
 
     public static void handleDiagramDataPacket(@Nullable DiagramDataPacket serverData){
+        if (diagramRequestQueue.isEmpty())
+            return;
+
+
+        UUID completed = diagramRequestQueue.poll();
+
+
+
+
+        waitingForResponse = false;
+
+
+        sendNextRequest();
 
     }
 }
