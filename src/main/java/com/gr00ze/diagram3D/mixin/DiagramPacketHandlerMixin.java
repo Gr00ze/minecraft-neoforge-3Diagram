@@ -1,6 +1,7 @@
 package com.gr00ze.diagram3D.mixin;
 
 
+import com.gr00ze.diagram3D.Diagram3DClient;
 import dev.simulated_team.simulated.network.packets.contraption_diagram.DiagramDataPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,7 +17,8 @@ public class DiagramPacketHandlerMixin {
         at = @At("TAIL")
     )
     private static void saveData(DiagramDataPacket packet, CallbackInfo ci) {
-        System.out.println("HOOK RUOTE ATTIVO");
+        //it is possible that is needed a check
+        Diagram3DClient.handleDiagramDataPacket(packet);
 
     }
 }
