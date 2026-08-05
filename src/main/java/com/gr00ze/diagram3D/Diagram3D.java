@@ -26,7 +26,7 @@ public class Diagram3D
 
     public Diagram3D(IEventBus modEventBus, ModContainer modContainer)
     {
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+
     }
 
 
