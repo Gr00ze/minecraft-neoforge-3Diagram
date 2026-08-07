@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -26,9 +27,12 @@ public class VectorRenderer {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER)
             return;
 
-        PoseStack pose = event.getPoseStack();
-
         Minecraft mc = Minecraft.getInstance();
+
+        Player player = mc.player;
+        if(player == null)
+            return;
+        PoseStack pose = event.getPoseStack();
 
         Vec3 camera = mc.gameRenderer
             .getMainCamera()
@@ -48,7 +52,8 @@ public class VectorRenderer {
         VertexConsumer consumer =
             buffer.getBuffer(RenderTypes.FORCE_LINES);
 
-        Vec3 look = mc.player.getLookAngle();
+
+        Vec3 look = player.getLookAngle();
 
         for (DiagramDataCache cached : diagramDataCache.values())
         {
@@ -100,7 +105,7 @@ public class VectorRenderer {
         //Section for testing purposes end
 
     }
-
+    /// It draws an arrow with VertexFormat.Mode.LINES
     private static void drawVector(
         PoseStack poseStack,
         VertexConsumer consumer,
