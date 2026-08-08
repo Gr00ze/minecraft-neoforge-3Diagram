@@ -21,6 +21,7 @@ public class Diagram3DClient {
 
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
         container.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
+        Diagram3D.LOGGER.info("Configs registered");
     }
 
     @SubscribeEvent
@@ -28,12 +29,13 @@ public class Diagram3DClient {
         // Some client setup code
 //        Diagram3D.LOGGER.info("HELLO FROM CLIENT SETUP");
 //        Diagram3D.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
-
+        Diagram3D.LOGGER.info("Mod initialized");
         RenderTypes.init();
     }
 
     @SubscribeEvent
     public static void registerCommands(RegisterCommandsEvent event) {
         DevCommands.register(event.getDispatcher());
+        Diagram3D.LOGGER.info("Commands registered");
     }
 }
