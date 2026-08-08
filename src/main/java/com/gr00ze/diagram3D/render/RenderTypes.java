@@ -25,7 +25,22 @@ public class RenderTypes {
                 .createCompositeState(false));
 
 
-
+    public static final RenderType BACKGROUND_QUADS = RenderType.create(
+        "3d_display_background",
+        DefaultVertexFormat.POSITION_COLOR,
+        VertexFormat.Mode.QUADS,
+        256,
+        false,
+        false,
+        RenderType.CompositeState.builder()
+            .setShaderState(RenderStateShard.RENDERTYPE_CUTOUT_SHADER)
+            .setTransparencyState(RenderStateShard.NO_TRANSPARENCY)
+            .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
+            .setCullState(RenderStateShard.NO_CULL)
+            .setLightmapState(RenderStateShard.NO_LIGHTMAP)
+            .setWriteMaskState(RenderStateShard.COLOR_WRITE)
+            .createCompositeState(false)
+    );
 
     public static void init(){}
 }
