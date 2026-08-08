@@ -23,7 +23,7 @@ public class DiagramRecords {
     ) {}
 
     public record ResolvedForce(
-        Vec3 from,
-        Vec3 to
+        Vec3 origin,
+        Vec3 delta
     ) {}
 }
