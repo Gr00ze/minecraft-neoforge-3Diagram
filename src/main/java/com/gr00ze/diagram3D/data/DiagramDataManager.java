@@ -146,13 +146,6 @@ public class DiagramDataManager {
 
         waitingForResponse = false;
 
-        Diagram3D.LOGGER.debug(
-            "Received diagram for {} ({} to groups)",
-            completed,
-            serverData.forces().size()
-        );
-
-
         sendNextRequest();
     }
 
