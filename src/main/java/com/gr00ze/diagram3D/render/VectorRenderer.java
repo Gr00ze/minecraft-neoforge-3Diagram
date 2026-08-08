@@ -4,11 +4,14 @@ import com.gr00ze.diagram3D.Diagram3D;
 import com.gr00ze.diagram3D.data.DiagramRecords.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.simibubi.create.foundation.gui.RemovedGuiUtils;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -19,6 +22,8 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
+
+import java.util.List;
 
 import static com.gr00ze.diagram3D.ClientConfig.FORCE_VISUAL_SCALE;
 import static com.gr00ze.diagram3D.data.DiagramDataManager.diagramDataCache;
@@ -36,82 +41,40 @@ public class VectorRenderer {
         Player player = mc.player;
         if(player == null)
             return;
+
         PoseStack pose = event.getPoseStack();
-
         Camera camera = mc.gameRenderer.getMainCamera();
-        Vec3 cameraPosition = camera.getPosition();
-        Vec3 cameraDirection = new Vec3(camera.getLookVector());
+        MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
 
-        MultiBufferSource.BufferSource buffer =
-            mc.renderBuffers().bufferSource();
-
+        //drawQuad(pose, buffer, camera);
+        //buffer.endBatch(RenderType.debugQuads());
 
 
-        Vec3 position = player.position();
-        pose.pushPose();
-
-        pose.translate(
-            -cameraPosition.x,
-            -cameraPosition.y,
-            -cameraPosition.z
-        );
-//        pose.mulPose(
-//            Minecraft.getInstance()
-//                .gameRenderer
-//                .getMainCamera()
-//                .rotation()
-//        );
-
-//        pose.scale(
-//            -10.25f,
-//            -10.25f,
-//            10.25f
-//        );
-        mc.font.drawInBatch(
-            "name",
-            -mc.font.width("name") / 2.0f,
-            0,
-            0xFFFFFFFF,
-            false,
-            pose.last().pose(),
-            buffer,
-            Font.DisplayMode.SEE_THROUGH,
-            0xAAFFFFFF,
-            LightTexture.FULL_BRIGHT
-        );
-
-        pose.popPose();
 
 
         for (DiagramDataCache cached : diagramDataCache.values())
         {
             for (ResolvedForceGroup forcesGroup : cached.groups())
             {
+                int forceGroupColorARGB = 0xFF000000 | forcesGroup.color();
                 for (ResolvedForce pointForce : forcesGroup.forces())
                 {
-//                    Diagram3D.LOGGER.info(
-//                        "Point {} Force {}",
-//                        pointForce.from(),
-//                        pointForce.to()
-//                    );
+
                     drawVector(
                         pose,
                         buffer,
-                        pointForce.from(),
-                        pointForce.to(),
-                        cameraPosition,
-                        cameraDirection,
-                        0xFF000000 | forcesGroup.color()
+                        pointForce,
+                        camera,
+                        forceGroupColorARGB
                     );
 
                     drawInfo(
                         pose,
                         buffer,
                         mc.font,
-                        pointForce.from(),
-                        pointForce.to(),
-                        cameraPosition,
-                        0xFF000000 | forcesGroup.color(),
+                        pointForce,
+                        camera,
+                        forceGroupColorARGB,
                         forcesGroup.name()
                     );
 
@@ -120,11 +83,82 @@ public class VectorRenderer {
             }
         }
 
-        buffer.endBatch();
+
 
     }
 
+    private static void drawQuad(
+        PoseStack pose,
+        MultiBufferSource.BufferSource buffer,
+        Camera camera
+    ) {
+        Vec3 cameraPos = camera.getPosition();
 
+        // posizione 3 blocchi davanti alla camera
+        Vec3 pos = cameraPos.add(new Vec3(camera.getLookVector()).scale(3.0));
+
+        pose.pushPose();
+
+        // coordinate relative alla camera
+        pose.translate(
+            pos.x - cameraPos.x,
+            pos.y - cameraPos.y,
+            pos.z - cameraPos.z
+        );
+        pose.mulPose(camera.rotation());
+
+        VertexConsumer vc = buffer.getBuffer(RenderType.textBackground());
+
+        Matrix4f matrix = pose.last().pose();
+
+        float size = 1.0f;
+
+        vc.addVertex(matrix, -size, -size, 0)
+            .setColor(0, 0, 10, 255)
+            .setLight(255);
+
+        vc.addVertex(matrix,  size, -size, 0)
+            .setColor(0, 0, 10, 255)
+            .setLight(255);
+
+        vc.addVertex(matrix,  size,  size, 0)
+            .setColor(0, 0, 10, 100)
+            .setLight(255);
+
+        vc.addVertex(matrix, -size,  size, 0)
+            .setColor(0, 0, 10, 100)
+            .setLight(255);
+
+        pose.popPose();
+
+
+
+    }
+
+    public static void renderTest(GuiGraphics guiGraphics) {
+        Minecraft mc = Minecraft.getInstance();
+
+        List<Component> tooltip = List.of(
+            Component.literal("Ciao")
+        );
+
+        int x = mc.getWindow().getGuiScaledWidth() / 2;
+        int y = mc.getWindow().getGuiScaledHeight() / 2;
+
+        RemovedGuiUtils.drawHoveringText(
+            guiGraphics,
+            tooltip,
+            x,
+            y,
+            guiGraphics.guiWidth(),
+            guiGraphics.guiHeight(),
+            -1,
+            0xF0100010,
+            0x505000FF,
+            0x28000000,
+            mc.font
+        );
+    }
     private static void drawTestArrow(Vec3 look, Vec3 eye){
         //Section for testing purposes
 
@@ -150,13 +184,18 @@ public class VectorRenderer {
     private static void drawVector(
         PoseStack poseStack,
         MultiBufferSource.BufferSource buffer,
-        Vec3 point,
-        Vec3 force,
-        Vec3 cameraPosition,
-        Vec3 cameraDirection,
+        ResolvedForce forceData,
+        Camera camera,
         int color
     )
     {
+
+        Vec3 origin = forceData.origin();
+        Vec3 delta = forceData.delta();
+
+        Vec3 cameraPosition = camera.getPosition();
+        Vec3 cameraDirection = new Vec3(camera.getLookVector());
+
         poseStack.pushPose();
 
         poseStack.translate(
@@ -169,22 +208,18 @@ public class VectorRenderer {
         VertexConsumer consumer =
             buffer.getBuffer(RenderTypes.FORCE_LINES);
 
-        Vec3 start = new Vec3(
-            point.x(),
-            point.y(),
-            point.z()
-        );
 
-        Vec3 end = start.add(
-            force.x() * FORCE_VISUAL_SCALE,
-            force.y() * FORCE_VISUAL_SCALE,
-            force.z() * FORCE_VISUAL_SCALE
+
+        Vec3 end = origin.add(
+            delta.x() * FORCE_VISUAL_SCALE,
+            delta.y() * FORCE_VISUAL_SCALE,
+            delta.z() * FORCE_VISUAL_SCALE
         );
 
         drawArrow(
             poseStack,
             consumer,
-            start,
+            origin,
             end,
             cameraDirection,
             color
@@ -193,7 +228,7 @@ public class VectorRenderer {
         drawLine(
             poseStack,
             consumer,
-            start,
+            origin,
             end,
             color
         );
@@ -243,7 +278,7 @@ public class VectorRenderer {
         );
 
 
-        // from V
+        // origin V
         drawLine(
             poseStack,
             consumer,
@@ -302,35 +337,79 @@ public class VectorRenderer {
     }
 
 
-    private static void drawInfo(PoseStack pose, MultiBufferSource.BufferSource buffer, Font font, Vec3 from, Vec3 to, Vec3 cameraPosition, int color, Component name) {
+    private static void drawInfo(
+        PoseStack pose,
+        MultiBufferSource.BufferSource buffer,
+        Font font,
+        ResolvedForce forceData,
+        Camera camera,
+        int color,
+        Component forceName
+    ) {
 
-        Vec3 position = from.add(to).scale(0.5);
+        String name = forceName.getString();
+        String defaultText = " force of ";
+        String value = String.format("%.2f pN", forceData.delta().length());
+
+        Component nameText = Component.literal(name)
+            .withStyle(style -> style.withColor(color));
+
+        Component valueText = Component.literal(defaultText + " ")
+            .withStyle(style -> style.withColor(0xF7F0DD))
+            .append(Component.literal(value)
+                .withStyle(style -> style.withColor(0xFFFFFF)));
+
+        float nameWidth = font.width(nameText);
+        float valueWidth = font.width(valueText);
+
+        Vec3 origin = forceData.origin(),
+            delta = forceData.delta();
+        Vec3 cameraPosition = camera.getPosition();
+
+        // position = (end + start) / 2 = ((origin + delta)) + origin) / 2 = origin + delta / 2
+        Vec3 position = origin.add(delta.scale(0.5 * FORCE_VISUAL_SCALE));
+
         pose.pushPose();
 
-        pose.translate(
-            position.x,
-            position.y,
-            position.z
-        );
-//        pose.mulPose(
-//            Minecraft.getInstance()
-//                .gameRenderer
-//                .getMainCamera()
-//                .rotation()
-//        );
+        float halfWidth = Math.max(nameWidth, valueWidth) * 0.5F + 4;
+        float halfHeight = font.lineHeight  + 3;
 
-        pose.scale(
-            -0.25f,
-            -0.25f,
-            0.25f
+        pose.translate(
+            position.x - cameraPosition.x,
+            position.y - cameraPosition.y,
+            position.z - cameraPosition.z
         );
+        pose.mulPose(camera.rotation());
+        pose.scale(
+            0.025f,
+            -0.025f,
+            0.025f
+        );
+
+        Matrix4f matrix = pose.last().pose();
+
+        drawTextBackground(buffer, matrix, halfWidth, halfHeight);
+
         font.drawInBatch(
-            name,
-            -font.width(name) / 2.0f,
-            0,
-            color,
+            nameText,
+            -nameWidth * 0.5F,
+            -font.lineHeight,
+            0xFFFFFFFF,
             false,
-            pose.last().pose(),
+            matrix,
+            buffer,
+            Font.DisplayMode.SEE_THROUGH,
+            0,
+            LightTexture.FULL_BRIGHT
+        );
+
+        font.drawInBatch(
+            valueText,
+            -valueWidth * 0.5F,
+            0,
+            0xFFFFFFFF,
+            false,
+            matrix,
             buffer,
             Font.DisplayMode.SEE_THROUGH,
             0,
@@ -338,5 +417,32 @@ public class VectorRenderer {
         );
 
         pose.popPose();
+    }
+
+    private static void drawTextBackground(MultiBufferSource.BufferSource buffer, Matrix4f matrix, float halfWidth, float halfHeight){
+        VertexConsumer background = buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
+
+        drawQuad(
+            background,
+            matrix,
+            new float[][]{
+                {-halfWidth, halfHeight},
+                {halfWidth, halfHeight},
+                {halfWidth, -halfHeight},
+                {-halfWidth, -halfHeight}
+            },
+            0xFF3D3D3A,
+            LightTexture.FULL_BRIGHT
+        );
+    }
+
+    private static void drawQuad(VertexConsumer consumer, Matrix4f matrix, float[][] points, int argb,int packedLight){
+        if (points.length != 4 || points[0].length != 2) return;
+
+        for (int i = 0; i < 4; i++) {
+            consumer.addVertex(matrix, points[i][0],  points[i][1], 0)
+                .setColor(argb)
+                .setLight(packedLight);
+        }
     }
 }
