@@ -41,6 +41,12 @@ public class DiagramDataManager {
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event)
     {
+
+        if(!ENABLED){
+            reset();
+            return;
+        }
+
         Minecraft mc = Minecraft.getInstance();
         Level level = mc.level;
         LocalPlayer player = mc.player;
@@ -64,7 +70,7 @@ public class DiagramDataManager {
         ticksWithoutUpdate++;
 
         //Not the time yet
-        if (ticksWithoutUpdate <= UPDATE_REQUEST_INTERVAL)
+        if (ticksWithoutUpdate <= UPDATE_REQUEST_TICK_INTERVAL)
             return;
 
 //        if (diagramRequestQueue.size() == 1)
@@ -155,6 +161,6 @@ public class DiagramDataManager {
         diagramDataCache.clear();
         diagramRequestQueue.clear();
         waitingForResponse = false;
-        ticksWithoutUpdate = UPDATE_REQUEST_INTERVAL;
+        ticksWithoutUpdate = UPDATE_REQUEST_TICK_INTERVAL;
     }
 }
