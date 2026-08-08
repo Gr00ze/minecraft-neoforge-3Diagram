@@ -93,7 +93,7 @@ public class DiagramDataResolver {
 
         Vector3d to = pose.transformNormal(localTo, new Vector3d());
 
-        Diagram3D.LOGGER.info(
+        Diagram3D.LOGGER.debug(
             "Convert local {} {} -> global {} {}",
             localFrom, localTo,
             from,to
