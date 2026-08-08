@@ -4,8 +4,12 @@ import com.gr00ze.diagram3D.Diagram3D;
 import com.gr00ze.diagram3D.data.DiagramRecords.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -34,26 +38,50 @@ public class VectorRenderer {
             return;
         PoseStack pose = event.getPoseStack();
 
-        Vec3 camera = mc.gameRenderer
-            .getMainCamera()
-            .getPosition();
-
-        pose.pushPose();
-
-        pose.translate(
-            -camera.x,
-            -camera.y,
-            -camera.z
-        );
+        Camera camera = mc.gameRenderer.getMainCamera();
+        Vec3 cameraPosition = camera.getPosition();
+        Vec3 cameraDirection = new Vec3(camera.getLookVector());
 
         MultiBufferSource.BufferSource buffer =
             mc.renderBuffers().bufferSource();
 
-        VertexConsumer consumer =
-            buffer.getBuffer(RenderTypes.FORCE_LINES);
 
 
-        Vec3 look = player.getLookAngle();
+        Vec3 position = player.position();
+        pose.pushPose();
+
+        pose.translate(
+            -cameraPosition.x,
+            -cameraPosition.y,
+            -cameraPosition.z
+        );
+//        pose.mulPose(
+//            Minecraft.getInstance()
+//                .gameRenderer
+//                .getMainCamera()
+//                .rotation()
+//        );
+
+//        pose.scale(
+//            -10.25f,
+//            -10.25f,
+//            10.25f
+//        );
+        mc.font.drawInBatch(
+            "name",
+            -mc.font.width("name") / 2.0f,
+            0,
+            0xFFFFFFFF,
+            false,
+            pose.last().pose(),
+            buffer,
+            Font.DisplayMode.SEE_THROUGH,
+            0xAAFFFFFF,
+            LightTexture.FULL_BRIGHT
+        );
+
+        pose.popPose();
+
 
         for (DiagramDataCache cached : diagramDataCache.values())
         {
@@ -68,12 +96,25 @@ public class VectorRenderer {
 //                    );
                     drawVector(
                         pose,
-                        consumer,
+                        buffer,
                         pointForce.from(),
                         pointForce.to(),
-                        look,
+                        cameraPosition,
+                        cameraDirection,
                         0xFF000000 | forcesGroup.color()
                     );
+
+                    drawInfo(
+                        pose,
+                        buffer,
+                        mc.font,
+                        pointForce.from(),
+                        pointForce.to(),
+                        cameraPosition,
+                        0xFF000000 | forcesGroup.color(),
+                        forcesGroup.name()
+                    );
+
 
                 }
             }
@@ -81,8 +122,8 @@ public class VectorRenderer {
 
         buffer.endBatch();
 
-        pose.popPose();
     }
+
 
     private static void drawTestArrow(Vec3 look, Vec3 eye){
         //Section for testing purposes
@@ -108,13 +149,26 @@ public class VectorRenderer {
     /// It draws an arrow with VertexFormat.Mode.LINES
     private static void drawVector(
         PoseStack poseStack,
-        VertexConsumer consumer,
+        MultiBufferSource.BufferSource buffer,
         Vec3 point,
         Vec3 force,
-        Vec3 cameraLook,
+        Vec3 cameraPosition,
+        Vec3 cameraDirection,
         int color
     )
     {
+        poseStack.pushPose();
+
+        poseStack.translate(
+            -cameraPosition.x,
+            -cameraPosition.y,
+            -cameraPosition.z
+        );
+
+
+        VertexConsumer consumer =
+            buffer.getBuffer(RenderTypes.FORCE_LINES);
+
         Vec3 start = new Vec3(
             point.x(),
             point.y(),
@@ -132,7 +186,7 @@ public class VectorRenderer {
             consumer,
             start,
             end,
-            cameraLook,
+            cameraDirection,
             color
         );
 
@@ -143,6 +197,8 @@ public class VectorRenderer {
             end,
             color
         );
+
+        poseStack.popPose();
     }
 
     private static void drawArrow(
@@ -153,14 +209,20 @@ public class VectorRenderer {
         Vec3 cameraLook,
         int color
     ){
-        Vec3 direction = end.subtract(start).normalize();
 
-        double headLength = 0.4;
-        double headWidth = 0.25;
+        Vec3 delta = end.subtract(start);
+        double distance = delta.length();
+
+        if (distance < 0.001)
+            return;
 
 
+        Vec3 direction =  delta.scale(1.0 / distance);
         // lateral vector
         Vec3 side = direction.cross(cameraLook).normalize();
+
+        double headSize = distance * 0.1;
+
 
         if (side.lengthSqr() < 0.001)
         {
@@ -168,16 +230,16 @@ public class VectorRenderer {
         }
 
         Vec3 back = end.subtract(
-            direction.scale(headLength)
+            direction.scale(headSize)
         );
 
 
         Vec3 tip1 = back.add(
-            side.scale(headWidth)
+            side.scale(headSize)
         );
 
         Vec3 tip2 = back.subtract(
-            side.scale(headWidth)
+            side.scale(headSize)
         );
 
 
@@ -239,4 +301,42 @@ public class VectorRenderer {
             );
     }
 
+
+    private static void drawInfo(PoseStack pose, MultiBufferSource.BufferSource buffer, Font font, Vec3 from, Vec3 to, Vec3 cameraPosition, int color, Component name) {
+
+        Vec3 position = from.add(to).scale(0.5);
+        pose.pushPose();
+
+        pose.translate(
+            position.x,
+            position.y,
+            position.z
+        );
+//        pose.mulPose(
+//            Minecraft.getInstance()
+//                .gameRenderer
+//                .getMainCamera()
+//                .rotation()
+//        );
+
+        pose.scale(
+            -0.25f,
+            -0.25f,
+            0.25f
+        );
+        font.drawInBatch(
+            name,
+            -font.width(name) / 2.0f,
+            0,
+            color,
+            false,
+            pose.last().pose(),
+            buffer,
+            Font.DisplayMode.SEE_THROUGH,
+            0,
+            LightTexture.FULL_BRIGHT
+        );
+
+        pose.popPose();
+    }
 }
