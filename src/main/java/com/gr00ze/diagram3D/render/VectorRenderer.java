@@ -81,6 +81,7 @@ public class VectorRenderer {
 
                 }
             }
+            drawCenterOfMass(buffer, pose, camera, cached.centerOfMass(), cached.mass());
         }
 
 
@@ -374,17 +375,7 @@ public class VectorRenderer {
         float halfWidth = Math.max(nameWidth, valueWidth) * 0.5F + 4;
         float halfHeight = font.lineHeight  + 3;
 
-        pose.translate(
-            position.x - cameraPosition.x,
-            position.y - cameraPosition.y,
-            position.z - cameraPosition.z
-        );
-        pose.mulPose(camera.rotation());
-        pose.scale(
-            0.025f,
-            -0.025f,
-            0.025f
-        );
+        applyTransformations(pose, camera, position, cameraPosition);
 
         Matrix4f matrix = pose.last().pose();
 
@@ -419,6 +410,20 @@ public class VectorRenderer {
         pose.popPose();
     }
 
+    private static void applyTransformations(PoseStack pose, Camera camera, Vec3 position, Vec3 cameraPosition) {
+        pose.translate(
+            position.x - cameraPosition.x,
+            position.y - cameraPosition.y,
+            position.z - cameraPosition.z
+        );
+        pose.mulPose(camera.rotation());
+        pose.scale(
+            0.025f,
+            -0.025f,
+            0.025f
+        );
+    }
+
     private static void drawTextBackground(MultiBufferSource.BufferSource buffer, Matrix4f matrix, float halfWidth, float halfHeight){
         VertexConsumer background = buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
 
@@ -431,7 +436,7 @@ public class VectorRenderer {
                 {halfWidth, -halfHeight},
                 {-halfWidth, -halfHeight}
             },
-            0xFF3D3D3A,
+            0x993D3D3A,
             LightTexture.FULL_BRIGHT
         );
     }
@@ -444,5 +449,35 @@ public class VectorRenderer {
                 .setColor(argb)
                 .setLight(packedLight);
         }
+    }
+
+
+    private static void drawCenterOfMass(MultiBufferSource.BufferSource buffer, PoseStack pose, Camera camera, Vec3 centerOfMass, double mass) {
+
+        pose.pushPose();
+        Vec3 cameraPosition = camera.getPosition();
+        applyTransformations(pose, camera, centerOfMass, cameraPosition);
+
+        float halfWidth = + 4;
+        float halfHeight =  + 3;
+
+        Matrix4f matrix = pose.last().pose();
+
+        VertexConsumer background = buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
+
+
+        drawQuad(
+            background,
+            matrix,
+            new float[][]{
+                {-halfWidth, halfHeight},
+                {halfWidth, halfHeight},
+                {halfWidth, -halfHeight},
+                {-halfWidth, -halfHeight}
+            },
+            0x993D3D3A,
+            LightTexture.FULL_BRIGHT
+        );
+        pose.popPose();
     }
 }
