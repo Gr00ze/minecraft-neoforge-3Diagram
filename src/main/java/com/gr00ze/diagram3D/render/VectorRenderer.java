@@ -4,14 +4,11 @@ import com.gr00ze.diagram3D.Diagram3D;
 import com.gr00ze.diagram3D.data.DiagramRecords.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.simibubi.create.foundation.gui.RemovedGuiUtils;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -20,10 +17,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
-import org.joml.Vector3d;
-import org.joml.Vector3dc;
-
-import java.util.List;
+import org.joml.Vector3f;
 
 import static com.gr00ze.diagram3D.ClientConfig.FORCE_VISUAL_SCALE;
 import static com.gr00ze.diagram3D.data.DiagramDataManager.diagramDataCache;
@@ -88,99 +82,7 @@ public class VectorRenderer {
 
     }
 
-    private static void drawQuad(
-        PoseStack pose,
-        MultiBufferSource.BufferSource buffer,
-        Camera camera
-    ) {
-        Vec3 cameraPos = camera.getPosition();
 
-        // posizione 3 blocchi davanti alla camera
-        Vec3 pos = cameraPos.add(new Vec3(camera.getLookVector()).scale(3.0));
-
-        pose.pushPose();
-
-        // coordinate relative alla camera
-        pose.translate(
-            pos.x - cameraPos.x,
-            pos.y - cameraPos.y,
-            pos.z - cameraPos.z
-        );
-        pose.mulPose(camera.rotation());
-
-        VertexConsumer vc = buffer.getBuffer(RenderType.textBackground());
-
-        Matrix4f matrix = pose.last().pose();
-
-        float size = 1.0f;
-
-        vc.addVertex(matrix, -size, -size, 0)
-            .setColor(0, 0, 10, 255)
-            .setLight(255);
-
-        vc.addVertex(matrix,  size, -size, 0)
-            .setColor(0, 0, 10, 255)
-            .setLight(255);
-
-        vc.addVertex(matrix,  size,  size, 0)
-            .setColor(0, 0, 10, 100)
-            .setLight(255);
-
-        vc.addVertex(matrix, -size,  size, 0)
-            .setColor(0, 0, 10, 100)
-            .setLight(255);
-
-        pose.popPose();
-
-
-
-    }
-
-    public static void renderTest(GuiGraphics guiGraphics) {
-        Minecraft mc = Minecraft.getInstance();
-
-        List<Component> tooltip = List.of(
-            Component.literal("Ciao")
-        );
-
-        int x = mc.getWindow().getGuiScaledWidth() / 2;
-        int y = mc.getWindow().getGuiScaledHeight() / 2;
-
-        RemovedGuiUtils.drawHoveringText(
-            guiGraphics,
-            tooltip,
-            x,
-            y,
-            guiGraphics.guiWidth(),
-            guiGraphics.guiHeight(),
-            -1,
-            0xF0100010,
-            0x505000FF,
-            0x28000000,
-            mc.font
-        );
-    }
-    private static void drawTestArrow(Vec3 look, Vec3 eye){
-        //Section for testing purposes
-
-        Vec3 origin = eye.add(look.scale(2.0));   // 2 blocks ahead
-
-        origin = origin.subtract(0, 1.0, 0);      // lower
-
-        Vector3dc start = new Vector3d(
-            origin.x,
-            origin.y,
-            origin.z
-        );
-
-        Vector3dc force = new Vector3d(
-            0,
-            10,
-            0
-        );
-        //Section for testing purposes end
-
-    }
     /// It draws an arrow with VertexFormat.Mode.LINES
     private static void drawVector(
         PoseStack poseStack,
@@ -226,10 +128,7 @@ public class VectorRenderer {
             color
         );
 
-        drawLine(
-            poseStack,
-            consumer,
-            origin,
+        RenderUtils.drawPositionColorLine(consumer, poseStack, origin,
             end,
             color
         );
@@ -280,62 +179,18 @@ public class VectorRenderer {
 
 
         // origin V
-        drawLine(
-            poseStack,
-            consumer,
-            end,
+        RenderUtils.drawPositionColorLine(consumer, poseStack, end,
             tip1,
             color
         );
 
-        drawLine(
-            poseStack,
-            consumer,
-            end,
+        RenderUtils.drawPositionColorLine(consumer, poseStack, end,
             tip2,
             color
         );
     }
 
-    private static void drawLine(
-        PoseStack poseStack,
-        VertexConsumer consumer,
-        Vec3 from,
-        Vec3 to,
-        int color
-    )
-    {
-        Matrix4f matrix = poseStack.last().pose();
 
-        consumer.addVertex(
-                matrix,
-                (float)from.x,
-                (float)from.y,
-                (float)from.z
-            )
-            .setColor(color)
-            .setNormal(
-                poseStack.last(),
-                0,
-                1,
-                0
-            );
-
-
-        consumer.addVertex(
-                matrix,
-                (float)to.x,
-                (float)to.y,
-                (float)to.z
-            )
-            .setColor(color)
-            .setNormal(
-                poseStack.last(),
-                0,
-                1,
-                0
-            );
-    }
 
 
     private static void drawInfo(
@@ -427,54 +282,29 @@ public class VectorRenderer {
     private static void drawTextBackground(MultiBufferSource.BufferSource buffer, Matrix4f matrix, float halfWidth, float halfHeight){
         VertexConsumer background = buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
 
-        drawQuad(
+        RenderUtils.drawQuad(
             background,
             matrix,
-            new float[][]{
-                {-halfWidth, halfHeight},
-                {halfWidth, halfHeight},
-                {halfWidth, -halfHeight},
-                {-halfWidth, -halfHeight}
-            },
+            QuadPoints.centeredXY(halfWidth, halfHeight),
             0x993D3D3A,
             LightTexture.FULL_BRIGHT
         );
     }
 
-    private static void drawQuad(VertexConsumer consumer, Matrix4f matrix, float[][] points, int argb,int packedLight){
-        if (points.length != 4 || points[0].length != 2) return;
 
-        for (int i = 0; i < 4; i++) {
-            consumer.addVertex(matrix, points[i][0],  points[i][1], 0)
-                .setColor(argb)
-                .setLight(packedLight);
-        }
-    }
 
 
     private static void drawCenterOfMass(MultiBufferSource.BufferSource buffer, PoseStack pose, Camera camera, Vec3 centerOfMass, double mass) {
+        VertexConsumer background = buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
+        Vec3 cameraPosition = camera.getPosition();
 
         pose.pushPose();
-        Vec3 cameraPosition = camera.getPosition();
         applyTransformations(pose, camera, centerOfMass, cameraPosition);
-
-        float halfWidth = + 4;
-        float halfHeight =  + 3;
-
         Matrix4f matrix = pose.last().pose();
-
-        VertexConsumer background = buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
-
-
-        drawQuad(
+        RenderUtils.drawQuad(
             background,
             matrix,
-            new float[][]{
-                {-halfWidth, halfHeight},
-                {halfWidth, halfHeight},
-                {halfWidth, -halfHeight},
-                {-halfWidth, -halfHeight}
-            },
+            QuadPoints.centeredXY(4, 3),
             0x993D3D3A,
             LightTexture.FULL_BRIGHT
         );
