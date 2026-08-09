@@ -4,7 +4,8 @@ import com.gr00ze.diagram3D.ClientConfig;
 import com.gr00ze.diagram3D.Diagram3D;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -36,6 +37,14 @@ public class Keybinds {
 
         while (Keybinds.TOGGLE_KEY.consumeClick()) {
             ClientConfig.ENABLED = !ClientConfig.ENABLED;
+            if (Minecraft.getInstance().player != null) {
+                Minecraft.getInstance().player.displayClientMessage(
+                    Component.literal(
+                        ClientConfig.ENABLED ? "Enabled" : "Disabled"
+                    ),
+                    true
+                );
+            }
         }
     }
 
