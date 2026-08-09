@@ -20,3 +20,17 @@
 - Added rendering for force group information
 - Incremented rendered line size
 
+## V0.1.3 — Keybind
+
+- Add configurable keybind V to enable mod
+- Add the logic to se the rendering in creative and spectator, or survival with googles.
+
+## V0.2.0 — Force group display, Mass display, Keybind 
+
+- Added rendering for force group information
+- Added rendering for force group information
+- Incremented rendered line size
+- Add configurable keybind V to enable mod
+- Add the logic to se the rendering in creative and spectator, or survival with googles.
+
+
