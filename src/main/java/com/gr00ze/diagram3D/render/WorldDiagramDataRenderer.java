@@ -19,11 +19,11 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 
-import static com.gr00ze.diagram3D.ClientConfig.FORCE_VISUAL_SCALE;
+import static com.gr00ze.diagram3D.ClientConfig.*;
 import static com.gr00ze.diagram3D.data.DiagramDataManager.diagramDataCache;
 
 @EventBusSubscriber(modid = Diagram3D.MOD_ID, value = Dist.CLIENT)
-public class VectorRenderer {
+public class WorldDiagramDataRenderer {
 
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event){
@@ -75,7 +75,7 @@ public class VectorRenderer {
     private static void drawVector(MultiBufferSource.BufferSource buffer, PoseStack poseStack, Camera camera, ResolvedForce forceData, int color
     )
     {
-
+        if (!DISPLAY_VECTORS) return;
         Vec3 origin = forceData.origin();
         Vec3 delta = forceData.delta();
 
@@ -188,7 +188,7 @@ public class VectorRenderer {
     private static void drawInfo(MultiBufferSource.BufferSource buffer, Font font, PoseStack pose, Camera camera, ResolvedForce forceData, int color,
         Component forceName
     ) {
-
+        if (!DISPLAY_INFO_TAG) return;
         String name = forceName.getString();
         String defaultText = " force of ";
         String value = String.format("%.2f pN", forceData.delta().length());
@@ -302,6 +302,8 @@ public class VectorRenderer {
 
 
     private static void drawCenterOfMass(MultiBufferSource.BufferSource buffer, Font font, PoseStack pose, Camera camera, Vec3 centerOfMass, double mass) {
+        if (!DISPLAY_CENTER_OF_MASS) return;
+
         VertexConsumer background = buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
         Vec3 cameraPosition = camera.getPosition();
 
