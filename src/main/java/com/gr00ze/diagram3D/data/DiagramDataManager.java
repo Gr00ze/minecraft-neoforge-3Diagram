@@ -1,6 +1,6 @@
 package com.gr00ze.diagram3D.data;
 
-import com.gr00ze.diagram3D.Diagram3D;
+import dev.eriksonn.aeronautics.index.AeroItems;
 import dev.ryanhcode.sable.Sable;
 import dev.ryanhcode.sable.companion.math.BoundingBox3d;
 import dev.ryanhcode.sable.sublevel.SubLevel;
@@ -11,12 +11,10 @@ import foundry.veil.api.network.VeilPacketManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,7 +27,7 @@ import static com.gr00ze.diagram3D.data.DiagramDataResolver.getCenterOfMass;
 
 import com.gr00ze.diagram3D.data.DiagramRecords.*;
 
-@EventBusSubscriber(modid = Diagram3D.MOD_ID, value = Dist.CLIENT)
+
 public class DiagramDataManager {
 
     public static final Queue<UUID> diagramRequestQueue = new ArrayDeque<>();
@@ -39,11 +37,11 @@ public class DiagramDataManager {
 
     public static final Map<UUID, DiagramDataCache> diagramDataCache = new ConcurrentHashMap<>();
 
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event)
+
+    public static void onClientTick()
     {
 
-        if(!ENABLED){
+        if(!canPlayerSeeThings()){
             reset();
             return;
         }
@@ -158,5 +156,20 @@ public class DiagramDataManager {
         diagramRequestQueue.clear();
         waitingForResponse = false;
         ticksWithoutUpdate = UPDATE_REQUEST_TICK_INTERVAL;
+    }
+
+    public static boolean canPlayerSeeThings() {
+        Minecraft mc = Minecraft.getInstance();
+        Player player = mc.player;
+        if (player == null) {
+            return false;
+        }
+
+
+
+        return ENABLED && (
+            player.isCreative() ||
+            player.isSpectator() ||
+            AeroItems.AVIATORS_GOGGLES.isIn(player.getItemBySlot(EquipmentSlot.HEAD)));
     }
 }
