@@ -10,6 +10,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -17,7 +18,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 
 import static com.gr00ze.diagram3D.ClientConfig.FORCE_VISUAL_SCALE;
 import static com.gr00ze.diagram3D.data.DiagramDataManager.diagramDataCache;
@@ -49,27 +49,21 @@ public class VectorRenderer {
                 {
 
                     drawVector(
-                        pose,
                         buffer,
-                        pointForce,
-                        camera,
-                        forceGroupColorARGB
+                        pose, camera,
+                        pointForce, forceGroupColorARGB
                     );
 
                     drawInfo(
-                        pose,
-                        buffer,
-                        mc.font,
-                        pointForce,
-                        camera,
-                        forceGroupColorARGB,
-                        forcesGroup.name()
+                        buffer, mc.font,
+                        pose, camera,
+                        pointForce, forceGroupColorARGB, forcesGroup.name()
                     );
 
 
                 }
             }
-            drawCenterOfMass(buffer, pose, camera, cached.centerOfMass(), cached.mass());
+            drawCenterOfMass(buffer, mc.font, pose, camera, cached.centerOfMass(), cached.mass());
         }
 
 
@@ -78,12 +72,7 @@ public class VectorRenderer {
 
 
     /// It draws an arrow with VertexFormat.Mode.LINES
-    private static void drawVector(
-        PoseStack poseStack,
-        MultiBufferSource.BufferSource buffer,
-        ResolvedForce forceData,
-        Camera camera,
-        int color
+    private static void drawVector(MultiBufferSource.BufferSource buffer, PoseStack poseStack, Camera camera, ResolvedForce forceData, int color
     )
     {
 
@@ -196,13 +185,7 @@ public class VectorRenderer {
 
 
 
-    private static void drawInfo(
-        PoseStack pose,
-        MultiBufferSource.BufferSource buffer,
-        Font font,
-        ResolvedForce forceData,
-        Camera camera,
-        int color,
+    private static void drawInfo(MultiBufferSource.BufferSource buffer, Font font, PoseStack pose, Camera camera, ResolvedForce forceData, int color,
         Component forceName
     ) {
 
@@ -210,13 +193,17 @@ public class VectorRenderer {
         String defaultText = " force of ";
         String value = String.format("%.2f pN", forceData.delta().length());
 
-        Component nameText = Component.literal(name)
-            .withStyle(style -> style.withColor(color));
+        Component nameText = coloredText(name, color);
+        Component valueText = coloredText(defaultText + " ", 0xF7F0DD)
+            .append(coloredText(value, 0xFFFFFF));
 
-        Component valueText = Component.literal(defaultText + " ")
-            .withStyle(style -> style.withColor(0xF7F0DD))
-            .append(Component.literal(value)
-                .withStyle(style -> style.withColor(0xFFFFFF)));
+//        Component nameText = Component.literal(name)
+//            .withStyle(style -> style.withColor(color));
+//
+//        Component valueText = Component.literal(defaultText + " ")
+//            .withStyle(style -> style.withColor(0xF7F0DD))
+//            .append(Component.literal(value)
+//                .withStyle(style -> style.withColor(0xFFFFFF)));
 
         float nameWidth = font.width(nameText);
         float valueWidth = font.width(valueText);
@@ -239,31 +226,48 @@ public class VectorRenderer {
 
         drawTextBackground(buffer, matrix, halfWidth, halfHeight);
 
-        font.drawInBatch(
-            nameText,
-            -nameWidth * 0.5F,
-            -font.lineHeight,
-            0xFFFFFFFF,
-            false,
-            matrix,
+        drawText(
             buffer,
-            Font.DisplayMode.SEE_THROUGH,
-            0,
-            LightTexture.FULL_BRIGHT
+            font,
+            matrix,
+            nameText,
+            nameWidth,
+            font.lineHeight * 2
         );
 
-        font.drawInBatch(
-            valueText,
-            -valueWidth * 0.5F,
-            0,
-            0xFFFFFFFF,
-            false,
-            matrix,
+        drawText(
             buffer,
-            Font.DisplayMode.SEE_THROUGH,
-            0,
-            LightTexture.FULL_BRIGHT
+            font,
+            matrix,
+            valueText,
+            valueWidth,
+            0
         );
+//        font.drawInBatch(
+//            nameText,
+//            -nameWidth * 0.5F,
+//            -font.lineHeight,
+//            0xFFFFFFFF,
+//            false,
+//            matrix,
+//            buffer,
+//            Font.DisplayMode.SEE_THROUGH,
+//            0,
+//            LightTexture.FULL_BRIGHT
+//        );
+//
+//        font.drawInBatch(
+//            valueText,
+//            -valueWidth * 0.5F,
+//            0,
+//            0xFFFFFFFF,
+//            false,
+//            matrix,
+//            buffer,
+//            Font.DisplayMode.SEE_THROUGH,
+//            0,
+//            LightTexture.FULL_BRIGHT
+//        );
 
         pose.popPose();
     }
@@ -297,9 +301,14 @@ public class VectorRenderer {
 
 
 
-    private static void drawCenterOfMass(MultiBufferSource.BufferSource buffer, PoseStack pose, Camera camera, Vec3 centerOfMass, double mass) {
+    private static void drawCenterOfMass(MultiBufferSource.BufferSource buffer, Font font, PoseStack pose, Camera camera, Vec3 centerOfMass, double mass) {
         VertexConsumer background = buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
         Vec3 cameraPosition = camera.getPosition();
+
+        Component text = coloredText("Center of mass",0xFFAAAA00);
+        Component value = coloredText(String.format("%.2f Kpg", mass),0xFFFFFFFF);
+
+        float width = font.width(text) ;
 
         pose.pushPose();
         applyTransformations(pose, camera, centerOfMass, cameraPosition);
@@ -307,10 +316,51 @@ public class VectorRenderer {
         RenderUtils.drawQuad(
             background,
             matrix,
-            QuadPoints.centeredXY(4, 3),
+            QuadPoints.centeredXY(width * 0.5F + 4, font.lineHeight + 4),
             0x993D3D3A,
             LightTexture.FULL_BRIGHT
         );
+
+
+
+        drawText(
+            buffer,
+            font,
+            matrix,
+            text,
+            width,
+            font.lineHeight * 2
+        );
+        drawText(
+            buffer,
+            font,
+            matrix,
+            value,
+            width,
+            0
+            );
+
+
         pose.popPose();
+    }
+
+    public static MutableComponent coloredText(String text, int argb){
+        return Component.literal(text)
+            .withStyle(style -> style.withColor(argb));
+    }
+
+    public static void drawText(MultiBufferSource.BufferSource buffer, Font font, Matrix4f matrix, Component text, float width, float height){
+        font.drawInBatch(
+            text,
+            -width * 0.5F,
+            -height * 0.5F,
+            0xFFFFFFFF,
+            false,
+            matrix,
+            buffer,
+            Font.DisplayMode.SEE_THROUGH,
+            0,
+            LightTexture.FULL_BRIGHT
+        );
     }
 }
