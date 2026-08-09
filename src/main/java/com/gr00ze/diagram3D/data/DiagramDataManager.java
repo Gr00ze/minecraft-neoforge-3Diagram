@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.gr00ze.diagram3D.ClientConfig.*;
 import static com.gr00ze.diagram3D.data.DiagramDataResolver.convertDiagramData;
+import static com.gr00ze.diagram3D.data.DiagramDataResolver.getCenterOfMass;
 
 import com.gr00ze.diagram3D.data.DiagramRecords.*;
 
@@ -140,6 +141,8 @@ public class DiagramDataManager {
 
         diagramDataCache.put(completed, new DiagramDataCache(
             convertDiagramData(completed, serverData),
+            serverData.mass(),
+            getCenterOfMass(level, completed),
             level.getGameTime()
         ));
 

@@ -10,6 +10,8 @@ public class DiagramRecords {
 
     public record DiagramDataCache(
         List<ResolvedForceGroup> groups,
+        double mass,
+        Vec3 centerOfMass,
         long lastUpdate
     ) {}
 

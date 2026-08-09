@@ -86,13 +86,36 @@ public class DiagramDataResolver {
                 new Vec3(localTo.x(), localTo.y(), localTo.z())
             );;  //Return the original
 
-        Pose3dc pose = subLevel.logicalPose();
 
-        Vector3d from = pose
-            .transformPosition(localFrom, new Vector3d());
-
+        Pose3dc pose = subLevel.logicalPose(); //try render pose
+        Vector3d from = pose.transformPosition(localFrom, new Vector3d());
         Vector3d to = pose.transformNormal(localTo, new Vector3d());
 
+
         return new DiagramRecords.ResolvedForce(new Vec3(from.x, from.y, from.z),new Vec3(to.x, to.y, to.z));
+    }
+
+    public static Vec3 getCenterOfMass(Level level, UUID completed) {
+        SubLevelContainer container = SubLevelContainer.getContainer(level);
+
+        if (container == null) return null;
+
+        SubLevel subLevel = container.getSubLevel(completed);
+
+        if (subLevel == null) return null;
+
+        Vector3d rotationPointLocal = subLevel.logicalPose().rotationPoint();
+
+
+        Pose3dc pose = subLevel.logicalPose(); //try render pose
+        Vector3d rotationGlobal = pose.transformPosition(rotationPointLocal, new Vector3d());
+
+
+        return new Vec3(
+            rotationGlobal.x(),
+            rotationGlobal.y(),
+            rotationGlobal.z()
+        );
+
     }
 }
