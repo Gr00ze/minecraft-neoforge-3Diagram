@@ -26,7 +26,7 @@ public class RenderUtils {
     )
     {
         Matrix4f matrix = poseStack.last().pose();
-        Vector3f dir = point2.sub(point1);
+        Vector3f dir = point2.sub(point1, new Vector3f());
 
 
         consumer
