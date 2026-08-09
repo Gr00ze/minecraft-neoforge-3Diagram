@@ -9,14 +9,14 @@ import java.util.OptionalDouble;
 
 
 public class RenderTypes {
-    public static final RenderType FORCE_LINES =
+    public static RenderType FORCE_LINES =
         RenderType.create("lines_custom",
             DefaultVertexFormat.POSITION_COLOR_NORMAL,
             VertexFormat.Mode.LINES,
             1536,
             RenderType.CompositeState.builder()
                 .setShaderState(RenderStateShard.RENDERTYPE_LINES_SHADER)
-                .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
+                .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(5)))
                 .setLayeringState(RenderStateShard.VIEW_OFFSET_Z_LAYERING)
                 .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
                 .setWriteMaskState(RenderStateShard.COLOR_DEPTH_WRITE)
