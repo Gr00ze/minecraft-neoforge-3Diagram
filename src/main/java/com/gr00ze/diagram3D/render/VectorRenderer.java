@@ -40,12 +40,6 @@ public class VectorRenderer {
         Camera camera = mc.gameRenderer.getMainCamera();
         MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
 
-        //drawQuad(pose, buffer, camera);
-        //buffer.endBatch(RenderType.debugQuads());
-
-
-
-
         for (DiagramDataCache cached : diagramDataCache.values())
         {
             for (ResolvedForceGroup forcesGroup : cached.groups())
@@ -128,7 +122,10 @@ public class VectorRenderer {
             color
         );
 
-        RenderUtils.drawPositionColorLine(consumer, poseStack, origin,
+        RenderUtils.drawPositionColorLine(
+            consumer,
+            poseStack,
+            origin,
             end,
             color
         );
@@ -148,7 +145,7 @@ public class VectorRenderer {
         Vec3 delta = end.subtract(start);
         double distance = delta.length();
 
-        if (distance < 0.001)
+        if (distance < 0.01)
             return;
 
 
@@ -179,12 +176,18 @@ public class VectorRenderer {
 
 
         // origin V
-        RenderUtils.drawPositionColorLine(consumer, poseStack, end,
+        RenderUtils.drawPositionColorLine(
+            consumer,
+            poseStack,
+            end,
             tip1,
             color
         );
 
-        RenderUtils.drawPositionColorLine(consumer, poseStack, end,
+        RenderUtils.drawPositionColorLine(
+            consumer,
+            poseStack,
+            end,
             tip2,
             color
         );
