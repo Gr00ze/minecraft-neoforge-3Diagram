@@ -10,3 +10,7 @@
 - Fixed a bug in packet management that prevented the rendering from being displayed.
 - Now range of detection of sublevel (contraptions) is configurable
 - Now the mod can be disabled by config in game
+
+## V0.1.1 — Force group display
+
+- Added rendering for force group information
