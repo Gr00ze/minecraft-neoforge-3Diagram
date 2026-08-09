@@ -14,3 +14,9 @@
 ## V0.1.1 — Force group display
 
 - Added rendering for force group information
+
+## V0.1.2 — Mass display
+
+- Added rendering for force group information
+- Incremented rendered line size
+
