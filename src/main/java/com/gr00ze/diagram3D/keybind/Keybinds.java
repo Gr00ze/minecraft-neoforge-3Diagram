@@ -36,11 +36,11 @@ public class Keybinds {
     public static void checkKeys(){
 
         while (Keybinds.TOGGLE_KEY.consumeClick()) {
-            ClientConfig.ENABLED = !ClientConfig.ENABLED;
+            ClientConfig.toggle(ClientConfig.ENABLED);
             if (Minecraft.getInstance().player != null) {
                 Minecraft.getInstance().player.displayClientMessage(
                     Component.literal(
-                        ClientConfig.ENABLED ? "Enabled" : "Disabled"
+                        ClientConfig.ENABLED.get() ? "Enabled" : "Disabled"
                     ),
                     true
                 );

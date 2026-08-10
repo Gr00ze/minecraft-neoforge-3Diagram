@@ -87,7 +87,7 @@ public class DiagramDataManager {
         //It's time!
         ticksWithoutUpdate = 0;
 
-        Iterable<SubLevel> subLevels = getSubLevelInRange(level, player, RADIUS);
+        Iterable<SubLevel> subLevels = getSubLevelInRange(level, player, RADIUS.get());
 
         for (SubLevel subLevel : subLevels)
         {
@@ -167,7 +167,7 @@ public class DiagramDataManager {
 
 
 
-        return ENABLED && (
+        return ENABLED.get() && (
             player.isCreative() ||
             player.isSpectator() ||
             AeroItems.AVIATORS_GOGGLES.isIn(player.getItemBySlot(EquipmentSlot.HEAD)));

@@ -75,7 +75,7 @@ public class WorldDiagramDataRenderer {
     private static void drawVector(MultiBufferSource.BufferSource buffer, PoseStack poseStack, Camera camera, ResolvedForce forceData, int color
     )
     {
-        if (!DISPLAY_VECTORS) return;
+        if (!DISPLAY_VECTORS.get()) return;
         Vec3 origin = forceData.origin();
         Vec3 delta = forceData.delta();
 
@@ -188,7 +188,7 @@ public class WorldDiagramDataRenderer {
     private static void drawInfo(MultiBufferSource.BufferSource buffer, Font font, PoseStack pose, Camera camera, ResolvedForce forceData, int color,
         Component forceName
     ) {
-        if (!DISPLAY_INFO_TAG) return;
+        if (!DISPLAY_INFO_TAG.get()) return;
         String name = forceName.getString();
         String defaultText = " force of ";
         String value = String.format("%.2f pN", forceData.delta().length());
@@ -302,7 +302,7 @@ public class WorldDiagramDataRenderer {
 
 
     private static void drawCenterOfMass(MultiBufferSource.BufferSource buffer, Font font, PoseStack pose, Camera camera, Vec3 centerOfMass, double mass) {
-        if (!DISPLAY_CENTER_OF_MASS) return;
+        if (!DISPLAY_CENTER_OF_MASS.get()) return;
 
         VertexConsumer background = buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
         Vec3 cameraPosition = camera.getPosition();
