@@ -19,6 +19,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import static com.gr00ze.diagram3D.ClientConfig.*;
 import static com.gr00ze.diagram3D.data.DiagramDataManager.diagramDataCache;
@@ -249,31 +250,6 @@ public class WorldDiagramDataRenderer {
             valueWidth,
             0
         );
-//        font.drawInBatch(
-//            nameText,
-//            -nameWidth * 0.5F,
-//            -font.lineHeight,
-//            0xFFFFFFFF,
-//            false,
-//            matrix,
-//            buffer,
-//            Font.DisplayMode.SEE_THROUGH,
-//            0,
-//            LightTexture.FULL_BRIGHT
-//        );
-//
-//        font.drawInBatch(
-//            valueText,
-//            -valueWidth * 0.5F,
-//            0,
-//            0xFFFFFFFF,
-//            false,
-//            matrix,
-//            buffer,
-//            Font.DisplayMode.SEE_THROUGH,
-//            0,
-//            LightTexture.FULL_BRIGHT
-//        );
 
         pose.popPose();
     }
@@ -308,7 +284,17 @@ public class WorldDiagramDataRenderer {
 
 
     private static void drawCenterOfMass(MultiBufferSource.BufferSource buffer, Font font, PoseStack pose, Camera camera, Vec3 centerOfMass, double mass) {
+
         if (DISPLAY_CENTER_OF_MASS.get().equals(CenterOfMassMode.DISABLED) ) return;
+        if (DISPLAY_CENTER_OF_MASS.get().equals(CenterOfMassMode.DETAILS) ) {
+            drawCenterOfMassWithDetails(buffer, font, pose, camera, centerOfMass, mass);
+            return;
+        }
+        drawCenterOfMassIcon(buffer, font, pose, camera, centerOfMass);
+
+    }
+
+    private static void drawCenterOfMassWithDetails(MultiBufferSource.BufferSource buffer, Font font, PoseStack pose, Camera camera, Vec3 centerOfMass, double mass){
 
         VertexConsumer background = buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
         Vec3 cameraPosition = camera.getPosition();
@@ -346,12 +332,114 @@ public class WorldDiagramDataRenderer {
             value,
             width,
             0
-            );
+        );
 
 
         pose.popPose();
     }
+    private static void drawCenterOfMassIcon(
+        MultiBufferSource.BufferSource buffer,
+        Font font,
+        PoseStack pose,
+        Camera camera,
+        Vec3 centerOfMass
+    ) {
+        VertexConsumer background =
+            buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
 
+        Vec3 cameraPosition = camera.getPosition();
+
+        final float halfSize = 4F;
+        final float outline = 1F;
+
+        int dark = 0xFF4A2F18;
+        int light = 0xFF704A27;
+        int white = 0xFFFFFFFF;
+
+        pose.pushPose();
+
+        applyTransformations(
+            pose,
+            camera,
+            centerOfMass,
+            cameraPosition
+        );
+
+        Matrix4f matrix = pose.last().pose();
+
+        float megaHalfSize = halfSize * 2F;
+
+// outline/background leggermente più grande
+        RenderUtils.drawQuad(
+            background,
+            matrix,
+            QuadPoints.centeredXY(
+                0F,
+                0F,
+                megaHalfSize + outline,
+                megaHalfSize + outline
+            ),
+            white,
+            LightTexture.FULL_BRIGHT
+        );
+        // top-left
+        RenderUtils.drawQuad(
+            background,
+            matrix,
+            QuadPoints.centeredXY(
+                -halfSize,
+                halfSize,
+                halfSize,
+                halfSize
+            ),
+            dark,
+            LightTexture.FULL_BRIGHT
+        );
+
+        // top-right
+        RenderUtils.drawQuad(
+            background,
+            matrix,
+            QuadPoints.centeredXY(
+                halfSize,
+                halfSize,
+                halfSize,
+                halfSize
+            ),
+            light,
+            LightTexture.FULL_BRIGHT
+        );
+
+        // bottom-left
+        RenderUtils.drawQuad(
+            background,
+            matrix,
+            QuadPoints.centeredXY(
+                -halfSize,
+                -halfSize,
+                halfSize,
+                halfSize
+            ),
+            light,
+            LightTexture.FULL_BRIGHT
+        );
+
+        // bottom-right
+        RenderUtils.drawQuad(
+            background,
+            matrix,
+            QuadPoints.centeredXY(
+                halfSize,
+                -halfSize,
+                halfSize,
+                halfSize
+            ),
+            dark,
+            LightTexture.FULL_BRIGHT
+        );
+
+        pose.popPose();
+    }
     public static MutableComponent coloredText(String text, int argb){
         return Component.literal(text)
             .withStyle(style -> style.withColor(argb));
