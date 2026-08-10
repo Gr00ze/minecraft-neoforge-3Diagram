@@ -33,7 +33,7 @@ public class RenderTypes {
         false,
         false,
         RenderType.CompositeState.builder()
-            .setShaderState(RenderStateShard.RENDERTYPE_CUTOUT_SHADER)
+            .setShaderState(RenderStateShard.POSITION_COLOR_SHADER)
             .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
             .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
             .setCullState(RenderStateShard.NO_CULL)
