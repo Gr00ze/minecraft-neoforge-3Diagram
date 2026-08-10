@@ -1,5 +1,6 @@
 package com.gr00ze.diagram3D.render;
 
+import com.gr00ze.diagram3D.ClientConfig;
 import com.gr00ze.diagram3D.Diagram3D;
 import com.gr00ze.diagram3D.data.DiagramRecords.*;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -42,23 +43,28 @@ public class WorldDiagramDataRenderer {
 
         for (DiagramDataCache cached : diagramDataCache.values())
         {
-            for (ResolvedForceGroup forcesGroup : cached.groups())
+            for (ResolvedForceGroup forceGroup : cached.groups())
             {
-                int forceGroupColorARGB = 0xFF000000 | forcesGroup.color();
-                for (ResolvedForce pointForce : forcesGroup.forces())
+                int forceGroupColorARGB = 0xFF000000 | forceGroup.color();
+
+                ClientConfig.ForceGroupDisplayConfig config =
+                    ClientConfig.getForceGroupConfig(ClientConfig.getForceGroupId(forceGroup));
+
+
+                for (ResolvedForce pointForce : forceGroup.forces())
                 {
-
-                    drawVector(
-                        buffer,
-                        pose, camera,
-                        pointForce, forceGroupColorARGB
-                    );
-
-                    drawInfo(
-                        buffer, mc.font,
-                        pose, camera,
-                        pointForce, forceGroupColorARGB, forcesGroup.name()
-                    );
+                    if(config.vectors())
+                        drawVector(
+                            buffer,
+                            pose, camera,
+                            pointForce, forceGroupColorARGB
+                        );
+                    if(config.info())
+                        drawInfo(
+                            buffer, mc.font,
+                            pose, camera,
+                            pointForce, forceGroupColorARGB, forceGroup.name()
+                        );
 
 
                 }
@@ -302,7 +308,7 @@ public class WorldDiagramDataRenderer {
 
 
     private static void drawCenterOfMass(MultiBufferSource.BufferSource buffer, Font font, PoseStack pose, Camera camera, Vec3 centerOfMass, double mass) {
-        if (!DISPLAY_CENTER_OF_MASS.get()) return;
+        if (DISPLAY_CENTER_OF_MASS.get().equals(CenterOfMassMode.DISABLED) ) return;
 
         VertexConsumer background = buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
         Vec3 cameraPosition = camera.getPosition();

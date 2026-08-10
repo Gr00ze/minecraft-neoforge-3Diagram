@@ -2,6 +2,7 @@ package com.gr00ze.diagram3D.keybind;
 
 import com.gr00ze.diagram3D.ClientConfig;
 import com.gr00ze.diagram3D.Diagram3D;
+import com.gr00ze.diagram3D.gui.DisplayConfigScreen;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -33,19 +34,43 @@ public class Keybinds {
         GLFW.GLFW_KEY_V
     );
 
+
+    private static long toggleKeyPressTime = 0;
+    private static boolean toggleKeyWasDown = false;
+
+    private static final long LONG_PRESS_DURATION_MS = 400;
+
     public static void checkKeys(){
 
-        while (Keybinds.TOGGLE_KEY.consumeClick()) {
-            ClientConfig.toggle(ClientConfig.ENABLED);
-            if (Minecraft.getInstance().player != null) {
-                Minecraft.getInstance().player.displayClientMessage(
-                    Component.literal(
-                        ClientConfig.ENABLED.get() ? "Enabled" : "Disabled"
-                    ),
-                    true
-                );
+        boolean keyDown = Keybinds.TOGGLE_KEY.isDown();
+
+        if (keyDown && !toggleKeyWasDown) {
+            toggleKeyPressTime = System.currentTimeMillis();
+        }
+
+        if (!keyDown && toggleKeyWasDown) {
+            long duration = System.currentTimeMillis() - toggleKeyPressTime;
+
+            if (duration >= LONG_PRESS_DURATION_MS) {
+
+                Minecraft.getInstance().setScreen(new DisplayConfigScreen());
+
+            } else {
+                // Pressione breve → toggle
+                ClientConfig.toggle(ClientConfig.ENABLED);
+
+                if (Minecraft.getInstance().player != null) {
+                    Minecraft.getInstance().player.displayClientMessage(
+                        Component.literal(
+                            ClientConfig.ENABLED.get() ? "Enabled" : "Disabled"
+                        ),
+                        true
+                    );
+                }
             }
         }
+
+        toggleKeyWasDown = keyDown;
     }
 
 
