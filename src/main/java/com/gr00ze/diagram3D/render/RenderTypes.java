@@ -19,7 +19,7 @@ public class RenderTypes {
                 .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(5)))
                 .setLayeringState(RenderStateShard.VIEW_OFFSET_Z_LAYERING)
                 .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
-                .setWriteMaskState(RenderStateShard.COLOR_DEPTH_WRITE)
+                .setWriteMaskState(RenderStateShard.COLOR_WRITE)
                 .setCullState(RenderStateShard.NO_CULL)
                 .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
                 .createCompositeState(false));
