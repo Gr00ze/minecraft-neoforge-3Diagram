@@ -1,4 +1,20 @@
 {
   "diagram3d.configuration.radius": "Radius",
-  "diagram3d.configuration.enabled": "Enabled"
+  "diagram3d.configuration.enabled": "Enabled",
+  "diagram3d.configuration.display_vectors_info": "Display Vectors Info",
+  "diagram3d.configuration.display_center_of_mass": "Display Mass Mode",
+  "diagram3d.configuration.display_vectors": "Display Vectors",
+  "diagram3d.configuration.force_group_configs": "Force group configs",
+
+  "diagram3d.configuration.radius.tooltip": "The scan radius for which the player will ask information for sublevels to the server",
+  "diagram3d.configuration.enabled.tooltip": "Enable the entire mod",
+  "diagram3d.configuration.display_vectors.tooltip": "Enable the vector rendering",
+  "diagram3d.configuration.display_vectors_info.tooltip": "Enable the display vector info rendering",
+  "diagram3d.configuration.display_center_of_mass.tooltip": "The display center of the mass mode",
+  "diagram3d.configuration.force_group_configs.tooltip": "Configure the display of individual force groups.\nPress the 'toggle key' inside a world to configure it",
+
+  "diagram3d.configuration.title": "Diagram 3D Configuration",
+
+  "diagram3d.configuration.section.diagram3d.client.toml.title": "Client Configuration",
+  "diagram3d.configuration.section.diagram3d.client.toml": "Diagram 3D Client Settings"
 }
