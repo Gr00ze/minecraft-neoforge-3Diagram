@@ -44,6 +44,7 @@ public class WorldDiagramDataRenderer {
 
         for (DiagramDataCache cached : diagramDataCache.values())
         {
+            drawCenterOfMass(buffer, mc.font, pose, camera, cached.centerOfMass(), cached.mass());
             for (ResolvedForceGroup forceGroup : cached.groups())
             {
                 int forceGroupColorARGB = 0xFF000000 | forceGroup.color();
@@ -70,7 +71,7 @@ public class WorldDiagramDataRenderer {
 
                 }
             }
-            drawCenterOfMass(buffer, mc.font, pose, camera, cached.centerOfMass(), cached.mass());
+
         }
 
 
