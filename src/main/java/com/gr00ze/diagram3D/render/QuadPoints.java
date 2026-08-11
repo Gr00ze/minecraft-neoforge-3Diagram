@@ -50,6 +50,19 @@ public class QuadPoints {
             .add(-halfWidth, -halfHeight, 0);
     }
 
+    public static QuadPoints centeredXY(
+        float centerX,
+        float centerY,
+        float halfWidth,
+        float halfHeight
+    ) {
+        return QuadPoints.create()
+            .add(centerX - halfWidth, centerY + halfHeight, 0)
+            .add(centerX + halfWidth, centerY + halfHeight, 0)
+            .add(centerX + halfWidth, centerY - halfHeight, 0)
+            .add(centerX - halfWidth, centerY - halfHeight, 0);
+    }
+
     /// Shortcut to create a complete Quad
     public static QuadPoints of(Vector3f point1, Vector3f point2, Vector3f point3, Vector3f point4) {
         return QuadPoints.create()

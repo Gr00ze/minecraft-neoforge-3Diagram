@@ -1,6 +1,9 @@
 package com.gr00ze.diagram3D.render;
 
+import com.gr00ze.diagram3D.config.ClientConfig;
 import com.gr00ze.diagram3D.Diagram3D;
+import com.gr00ze.diagram3D.config.ConfigUtils;
+import com.gr00ze.diagram3D.config.ForceGroupDisplayConfig;
 import com.gr00ze.diagram3D.data.DiagramRecords.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -19,11 +22,11 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 
-import static com.gr00ze.diagram3D.ClientConfig.FORCE_VISUAL_SCALE;
+import static com.gr00ze.diagram3D.config.ClientConfig.*;
 import static com.gr00ze.diagram3D.data.DiagramDataManager.diagramDataCache;
 
 @EventBusSubscriber(modid = Diagram3D.MOD_ID, value = Dist.CLIENT)
-public class VectorRenderer {
+public class WorldDiagramDataRenderer {
 
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event){
@@ -42,28 +45,34 @@ public class VectorRenderer {
 
         for (DiagramDataCache cached : diagramDataCache.values())
         {
-            for (ResolvedForceGroup forcesGroup : cached.groups())
+            drawCenterOfMass(buffer, mc.font, pose, camera, cached.centerOfMass(), cached.mass());
+            for (ResolvedForceGroup forceGroup : cached.groups())
             {
-                int forceGroupColorARGB = 0xFF000000 | forcesGroup.color();
-                for (ResolvedForce pointForce : forcesGroup.forces())
+                int forceGroupColorARGB = 0xFF000000 | forceGroup.color();
+
+                ForceGroupDisplayConfig config =
+                    ClientConfig.getForceGroupConfig(ConfigUtils.getForceGroupId(forceGroup));
+
+
+                for (ResolvedForce pointForce : forceGroup.forces())
                 {
-
-                    drawVector(
-                        buffer,
-                        pose, camera,
-                        pointForce, forceGroupColorARGB
-                    );
-
-                    drawInfo(
-                        buffer, mc.font,
-                        pose, camera,
-                        pointForce, forceGroupColorARGB, forcesGroup.name()
-                    );
+                    if(config.vectors())
+                        drawVector(
+                            buffer,
+                            pose, camera,
+                            pointForce, forceGroupColorARGB
+                        );
+                    if(config.info())
+                        drawInfo(
+                            buffer, mc.font,
+                            pose, camera,
+                            pointForce, forceGroupColorARGB, forceGroup.name()
+                        );
 
 
                 }
             }
-            drawCenterOfMass(buffer, mc.font, pose, camera, cached.centerOfMass(), cached.mass());
+
         }
 
 
@@ -75,7 +84,7 @@ public class VectorRenderer {
     private static void drawVector(MultiBufferSource.BufferSource buffer, PoseStack poseStack, Camera camera, ResolvedForce forceData, int color
     )
     {
-
+        if (!DISPLAY_VECTORS.get()) return;
         Vec3 origin = forceData.origin();
         Vec3 delta = forceData.delta();
 
@@ -188,7 +197,7 @@ public class VectorRenderer {
     private static void drawInfo(MultiBufferSource.BufferSource buffer, Font font, PoseStack pose, Camera camera, ResolvedForce forceData, int color,
         Component forceName
     ) {
-
+        if (!DISPLAY_VECTORS_INFO.get()) return;
         String name = forceName.getString();
         String defaultText = " force of ";
         String value = String.format("%.2f pN", forceData.delta().length());
@@ -243,31 +252,6 @@ public class VectorRenderer {
             valueWidth,
             0
         );
-//        font.drawInBatch(
-//            nameText,
-//            -nameWidth * 0.5F,
-//            -font.lineHeight,
-//            0xFFFFFFFF,
-//            false,
-//            matrix,
-//            buffer,
-//            Font.DisplayMode.SEE_THROUGH,
-//            0,
-//            LightTexture.FULL_BRIGHT
-//        );
-//
-//        font.drawInBatch(
-//            valueText,
-//            -valueWidth * 0.5F,
-//            0,
-//            0xFFFFFFFF,
-//            false,
-//            matrix,
-//            buffer,
-//            Font.DisplayMode.SEE_THROUGH,
-//            0,
-//            LightTexture.FULL_BRIGHT
-//        );
 
         pose.popPose();
     }
@@ -302,6 +286,18 @@ public class VectorRenderer {
 
 
     private static void drawCenterOfMass(MultiBufferSource.BufferSource buffer, Font font, PoseStack pose, Camera camera, Vec3 centerOfMass, double mass) {
+
+        if (DISPLAY_CENTER_OF_MASS.get().equals(CenterOfMassMode.DISABLED) ) return;
+        if (DISPLAY_CENTER_OF_MASS.get().equals(CenterOfMassMode.DETAILS) ) {
+            drawCenterOfMassWithDetails(buffer, font, pose, camera, centerOfMass, mass);
+            return;
+        }
+        drawCenterOfMassIcon(buffer, font, pose, camera, centerOfMass);
+
+    }
+
+    private static void drawCenterOfMassWithDetails(MultiBufferSource.BufferSource buffer, Font font, PoseStack pose, Camera camera, Vec3 centerOfMass, double mass){
+
         VertexConsumer background = buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
         Vec3 cameraPosition = camera.getPosition();
 
@@ -338,12 +334,114 @@ public class VectorRenderer {
             value,
             width,
             0
-            );
+        );
 
 
         pose.popPose();
     }
+    private static void drawCenterOfMassIcon(
+        MultiBufferSource.BufferSource buffer,
+        Font font,
+        PoseStack pose,
+        Camera camera,
+        Vec3 centerOfMass
+    ) {
+        VertexConsumer background =
+            buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
 
+        Vec3 cameraPosition = camera.getPosition();
+
+        final float halfSize = 4F;
+        final float outline = 1F;
+
+        int dark = 0xFF4A2F18;
+        int light = 0xFF704A27;
+        int white = 0xFFFFFFFF;
+
+        pose.pushPose();
+
+        applyTransformations(
+            pose,
+            camera,
+            centerOfMass,
+            cameraPosition
+        );
+
+        Matrix4f matrix = pose.last().pose();
+
+        float megaHalfSize = halfSize * 2F;
+
+// outline/background leggermente più grande
+        RenderUtils.drawQuad(
+            background,
+            matrix,
+            QuadPoints.centeredXY(
+                0F,
+                0F,
+                megaHalfSize + outline,
+                megaHalfSize + outline
+            ),
+            white,
+            LightTexture.FULL_BRIGHT
+        );
+        // top-left
+        RenderUtils.drawQuad(
+            background,
+            matrix,
+            QuadPoints.centeredXY(
+                -halfSize,
+                halfSize,
+                halfSize,
+                halfSize
+            ),
+            dark,
+            LightTexture.FULL_BRIGHT
+        );
+
+        // top-right
+        RenderUtils.drawQuad(
+            background,
+            matrix,
+            QuadPoints.centeredXY(
+                halfSize,
+                halfSize,
+                halfSize,
+                halfSize
+            ),
+            light,
+            LightTexture.FULL_BRIGHT
+        );
+
+        // bottom-left
+        RenderUtils.drawQuad(
+            background,
+            matrix,
+            QuadPoints.centeredXY(
+                -halfSize,
+                -halfSize,
+                halfSize,
+                halfSize
+            ),
+            light,
+            LightTexture.FULL_BRIGHT
+        );
+
+        // bottom-right
+        RenderUtils.drawQuad(
+            background,
+            matrix,
+            QuadPoints.centeredXY(
+                halfSize,
+                -halfSize,
+                halfSize,
+                halfSize
+            ),
+            dark,
+            LightTexture.FULL_BRIGHT
+        );
+
+        pose.popPose();
+    }
     public static MutableComponent coloredText(String text, int argb){
         return Component.literal(text)
             .withStyle(style -> style.withColor(argb));

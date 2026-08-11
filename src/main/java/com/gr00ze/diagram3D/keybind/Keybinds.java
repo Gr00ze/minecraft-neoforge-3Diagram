@@ -1,10 +1,14 @@
 package com.gr00ze.diagram3D.keybind;
 
-import com.gr00ze.diagram3D.ClientConfig;
+import com.gr00ze.diagram3D.config.ClientConfig;
 import com.gr00ze.diagram3D.Diagram3D;
+import com.gr00ze.diagram3D.config.ConfigUtils;
+import com.gr00ze.diagram3D.gui.DisplayConfigScreen;
 import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -32,11 +36,48 @@ public class Keybinds {
         GLFW.GLFW_KEY_V
     );
 
+
+    private static long toggleKeyPressTime = 0;
+    private static boolean toggleKeyWasDown = false;
+
+    private static final long LONG_PRESS_DURATION_MS = 400;
+
     public static void checkKeys(){
 
-        while (Keybinds.TOGGLE_KEY.consumeClick()) {
-            ClientConfig.ENABLED = !ClientConfig.ENABLED;
+        boolean keyDown = Keybinds.TOGGLE_KEY.isDown();
+
+        if (keyDown && !toggleKeyWasDown) {
+            toggleKeyPressTime = System.currentTimeMillis();
         }
+
+        if (!keyDown && toggleKeyWasDown) {
+            long duration = System.currentTimeMillis() - toggleKeyPressTime;
+
+            if (duration >= LONG_PRESS_DURATION_MS) {
+
+                Minecraft.getInstance().setScreen(new DisplayConfigScreen());
+
+            } else {
+                // Pressione breve → toggle
+                ConfigUtils.toggle(ClientConfig.ENABLED);
+
+                if (Minecraft.getInstance().player != null) {
+                    Minecraft.getInstance().player.displayClientMessage(
+                        ClientConfig.ENABLED.get()
+                            ? Component.literal("Diagram Enabled")
+                            .append("\n")
+                            .append(
+                                Component.literal("Press longer to open the menu")
+                                .withStyle(ChatFormatting.GRAY))
+
+                            : Component.literal("Diagram Disabled"),
+                        false
+                    );
+                }
+            }
+        }
+
+        toggleKeyWasDown = keyDown;
     }
 
 

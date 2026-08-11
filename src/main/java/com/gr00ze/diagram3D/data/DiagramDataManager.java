@@ -13,7 +13,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.gr00ze.diagram3D.ClientConfig.*;
+import static com.gr00ze.diagram3D.config.ClientConfig.*;
 import static com.gr00ze.diagram3D.data.DiagramDataResolver.convertDiagramData;
 import static com.gr00ze.diagram3D.data.DiagramDataResolver.getCenterOfMass;
 
@@ -87,7 +86,7 @@ public class DiagramDataManager {
         //It's time!
         ticksWithoutUpdate = 0;
 
-        Iterable<SubLevel> subLevels = getSubLevelInRange(level, player, RADIUS);
+        Iterable<SubLevel> subLevels = getSubLevelInRange(level, player, RADIUS.get());
 
         for (SubLevel subLevel : subLevels)
         {
@@ -167,7 +166,7 @@ public class DiagramDataManager {
 
 
 
-        return ENABLED && (
+        return ENABLED.get() && (
             player.isCreative() ||
             player.isSpectator() ||
             AeroItems.AVIATORS_GOGGLES.isIn(player.getItemBySlot(EquipmentSlot.HEAD)));

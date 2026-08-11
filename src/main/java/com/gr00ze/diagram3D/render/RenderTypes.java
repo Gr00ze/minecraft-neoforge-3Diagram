@@ -19,7 +19,7 @@ public class RenderTypes {
                 .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(5)))
                 .setLayeringState(RenderStateShard.VIEW_OFFSET_Z_LAYERING)
                 .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
-                .setWriteMaskState(RenderStateShard.COLOR_DEPTH_WRITE)
+                .setWriteMaskState(RenderStateShard.COLOR_WRITE)
                 .setCullState(RenderStateShard.NO_CULL)
                 .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
                 .createCompositeState(false));
@@ -33,7 +33,7 @@ public class RenderTypes {
         false,
         false,
         RenderType.CompositeState.builder()
-            .setShaderState(RenderStateShard.RENDERTYPE_CUTOUT_SHADER)
+            .setShaderState(RenderStateShard.POSITION_COLOR_SHADER)
             .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
             .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
             .setCullState(RenderStateShard.NO_CULL)
