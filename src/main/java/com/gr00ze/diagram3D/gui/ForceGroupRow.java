@@ -73,14 +73,28 @@ public class ForceGroupRow {
         int mouseX,
         int mouseY
     ) {
-        String text = active ? "✓" : "—";
+        String text = active ? "✓" : "✕";
+
+        boolean hovered = mouseOver(mouseX, mouseY, centerX, y);
+
+        int color;
+
+        if (hovered) {
+            color = active
+                ? 0xFFFFFFFF
+                : 0xFFAAAAAA;
+        } else {
+            color = active
+                ? ACTIVE_COLOR
+                : INACTIVE_COLOR;
+        }
 
         guiGraphics.drawCenteredString(
             Minecraft.getInstance().font,
             text,
             centerX,
             y + 7,
-            active ? ACTIVE_COLOR : INACTIVE_COLOR
+            color
         );
     }
 
@@ -108,6 +122,18 @@ public class ForceGroupRow {
         }
 
         return false;
+    }
+
+    private boolean mouseOver(
+        double mouseX,
+        double mouseY,
+        int centerX,
+        int y
+    ) {
+        return mouseX >= centerX - 12
+            && mouseX <= centerX + 12
+            && mouseY >= y
+            && mouseY <= y + 12;
     }
 
     private ResourceLocation getId() {

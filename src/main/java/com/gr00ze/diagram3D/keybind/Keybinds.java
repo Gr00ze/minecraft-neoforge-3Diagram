@@ -4,6 +4,7 @@ import com.gr00ze.diagram3D.ClientConfig;
 import com.gr00ze.diagram3D.Diagram3D;
 import com.gr00ze.diagram3D.gui.DisplayConfigScreen;
 import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -61,10 +62,15 @@ public class Keybinds {
 
                 if (Minecraft.getInstance().player != null) {
                     Minecraft.getInstance().player.displayClientMessage(
-                        Component.literal(
-                            ClientConfig.ENABLED.get() ? "Enabled" : "Disabled"
-                        ),
-                        true
+                        ClientConfig.ENABLED.get()
+                            ? Component.literal("Diagram Enabled")
+                            .append("\n")
+                            .append(
+                                Component.literal("Press longer to open the menu")
+                                .withStyle(ChatFormatting.GRAY))
+
+                            : Component.literal("Diagram Disabled"),
+                        false
                     );
                 }
             }
