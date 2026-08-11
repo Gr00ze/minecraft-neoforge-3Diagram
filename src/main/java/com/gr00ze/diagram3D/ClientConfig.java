@@ -9,7 +9,9 @@ import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @EventBusSubscriber(modid = Diagram3D.MOD_ID)
@@ -36,6 +38,14 @@ public class ClientConfig
     //public static final ModConfigSpec.BooleanValue DISPLAY_CENTER_OF_MASS = BUILDER.define("display_center_of_mass", true);
     public static final ModConfigSpec.BooleanValue DISPLAY_VECTORS = BUILDER.define("display_vectors", true);
 
+    private static final ModConfigSpec.ConfigValue<List<? extends String>>
+        FORCE_GROUP_CONFIGS_VALUE = BUILDER.defineList(
+        "force_group_configs",
+        List.of(),
+        value -> value instanceof String
+    );
+
+
     static final ModConfigSpec SPEC = BUILDER.build();
 
     private static final Map<ResourceLocation, ForceGroupDisplayConfig>
@@ -44,6 +54,34 @@ public class ClientConfig
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event)
     {
+
+        if (event.getConfig().getSpec() != SPEC) {
+            return;
+        }
+
+        FORCE_GROUP_CONFIGS.clear();
+
+        for (String value : FORCE_GROUP_CONFIGS_VALUE.get()) {
+            String[] parts = value.split("\\|");
+
+            if (parts.length != 3) {
+                continue;
+            }
+
+            ResourceLocation id = ResourceLocation.tryParse(parts[0]);
+
+            if (id == null) {
+                continue;
+            }
+
+            boolean vectors = Boolean.parseBoolean(parts[1]);
+            boolean info = Boolean.parseBoolean(parts[2]);
+
+            FORCE_GROUP_CONFIGS.put(
+                id,
+                new ForceGroupDisplayConfig(vectors, info)
+            );
+        }
     }
 
     public static void toggle(ModConfigSpec.BooleanValue config){
@@ -96,11 +134,14 @@ public class ClientConfig
     }
 
     public static void toggleVectors(ResourceLocation id) {
+
         getForceGroupConfig(id).toggleVectors();
+        saveForceGroupConfigs();
     }
 
     public static void toggleInfo(ResourceLocation id) {
         getForceGroupConfig(id).toggleInfo();
+        saveForceGroupConfigs();
     }
 
     public static @Nullable ResourceLocation getForceGroupId(
@@ -130,5 +171,26 @@ public class ClientConfig
                 + ":"
                 + value.substring(separator + 1)
         );
+    }
+
+    private static void saveForceGroupConfigs()
+    {
+        List<String> values = new ArrayList<>();
+
+        for (Map.Entry<ResourceLocation, ForceGroupDisplayConfig> entry
+            : FORCE_GROUP_CONFIGS.entrySet()) {
+
+            ResourceLocation id = entry.getKey();
+            ForceGroupDisplayConfig config = entry.getValue();
+
+            values.add(
+                id + "|"
+                    + config.vectors() + "|"
+                    + config.info()
+            );
+        }
+
+        FORCE_GROUP_CONFIGS_VALUE.set(values);
+        FORCE_GROUP_CONFIGS_VALUE.save();
     }
 }
