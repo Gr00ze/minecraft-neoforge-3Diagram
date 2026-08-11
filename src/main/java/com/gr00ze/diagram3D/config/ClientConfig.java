@@ -2,17 +2,13 @@ package com.gr00ze.diagram3D.config;
 
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.InMemoryFormat;
-import com.electronwill.nightconfig.core.UnmodifiableConfig;
 import com.gr00ze.diagram3D.Diagram3D;
-import com.gr00ze.diagram3D.data.DiagramRecords;
-import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
 @EventBusSubscriber(modid = Diagram3D.MOD_ID)
@@ -41,25 +37,42 @@ public class ClientConfig
     public static final ModConfigSpec.BooleanValue ENABLED = BUILDER
         .comment("Enable the entire mod")
         .define("enabled", true);
-    public static final ModConfigSpec.BooleanValue DISPLAY_VECTORS = BUILDER
-        .comment("Enable the vector rendering")
-        .define("display_vectors", true);
-    public static final ModConfigSpec.BooleanValue DISPLAY_VECTORS_INFO = BUILDER
-        .comment("Enable the display vector info rendering")
-        .define("display_vectors_info", true);
-    public static final ModConfigSpec.EnumValue<CenterOfMassMode> DISPLAY_CENTER_OF_MASS = BUILDER
-        .comment("The display center of the mass mode")
-        .defineEnum("display_center_of_mass", CenterOfMassMode.DETAILS);
-    public static final ModConfigSpec.ConfigValue<Config>
+    public static final ModConfigSpec.BooleanValue DISPLAY_VECTORS;
+    public static final ModConfigSpec.BooleanValue DISPLAY_VECTORS_INFO;
+    public static final ModConfigSpec.EnumValue<CenterOfMassMode> DISPLAY_CENTER_OF_MASS;
+    public static final ModConfigSpec.ConfigValue<Config> FORCE_GROUP_CONFIGS_VALUE;
+
+    static {
+        BUILDER.push("Rendering");
+
+        DISPLAY_VECTORS = BUILDER
+            .comment("Enable the vector rendering")
+            .define("display_vectors", true);
+
+        DISPLAY_VECTORS_INFO = BUILDER
+            .comment("Enable the display vector info rendering")
+            .define("display_vectors_info", true);
+
+        DISPLAY_CENTER_OF_MASS = BUILDER
+            .comment("The display center of the mass mode")
+            .defineEnum(
+                "display_center_of_mass",
+                CenterOfMassMode.DETAILS
+            );
+        BUILDER.pop();
+        BUILDER.push("Custom");
         FORCE_GROUP_CONFIGS_VALUE = BUILDER
-        .define(
-            "force_group_configs",
-            () -> Config.of(
-                LinkedHashMap::new,
-                InMemoryFormat.withUniversalSupport()
-            ),
-            value -> value instanceof Config
-        );
+            .define(
+                "force_group_configs",
+                () -> Config.of(
+                    LinkedHashMap::new,
+                    InMemoryFormat.withUniversalSupport()
+                ),
+                value -> value instanceof Config
+            );
+
+        BUILDER.pop();
+    }
 
 
 
