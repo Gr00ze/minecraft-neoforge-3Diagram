@@ -1,6 +1,7 @@
 package com.gr00ze.diagram3D;
 
 import com.gr00ze.diagram3D.commands.DevCommands;
+import com.gr00ze.diagram3D.config.ClientConfig;
 import com.gr00ze.diagram3D.keybind.Keybinds;
 import com.gr00ze.diagram3D.render.RenderTypes;
 import net.neoforged.api.distmarker.Dist;

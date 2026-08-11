@@ -1,6 +1,7 @@
 package com.gr00ze.diagram3D.gui;
 
-import com.gr00ze.diagram3D.ClientConfig;
+import com.gr00ze.diagram3D.config.ClientConfig;
+import com.gr00ze.diagram3D.config.ConfigUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Renderable;
@@ -90,7 +91,7 @@ public class DisplayConfigScreen extends Screen {
     }
 
     private Component getCenterOfMassLabel() {
-        return switch (ClientConfig.getCenterOfMassMode()) {
+        return switch (ConfigUtils.getCenterOfMassMode()) {
             case DISABLED ->
                 Component.literal("Disabled");
 
@@ -104,7 +105,7 @@ public class DisplayConfigScreen extends Screen {
 
     private void cycleCenterOfMass() {
         ClientConfig.CenterOfMassMode current =
-            ClientConfig.getCenterOfMassMode();
+            ConfigUtils.getCenterOfMassMode();
 
         ClientConfig.CenterOfMassMode next =
             switch (current) {
@@ -113,7 +114,7 @@ public class DisplayConfigScreen extends Screen {
                 case DETAILS -> ClientConfig.CenterOfMassMode.DISABLED;
             };
 
-        ClientConfig.setCenterOfMassMode(next);
+        ConfigUtils.setCenterOfMassMode(next);
 
         this.clearWidgets();
         this.init();

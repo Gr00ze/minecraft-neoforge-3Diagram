@@ -1,6 +1,8 @@
 package com.gr00ze.diagram3D.gui;
 
-import com.gr00ze.diagram3D.ClientConfig;
+import com.gr00ze.diagram3D.config.ClientConfig;
+import com.gr00ze.diagram3D.config.ConfigUtils;
+import com.gr00ze.diagram3D.config.ForceGroupDisplayConfig;
 import dev.ryanhcode.sable.api.physics.force.ForceGroup;
 import dev.ryanhcode.sable.api.physics.force.ForceGroups;
 import net.minecraft.client.Minecraft;
@@ -32,7 +34,7 @@ public class ForceGroupRow {
         ResourceLocation id = getId();
 
 
-        ClientConfig.ForceGroupDisplayConfig config =
+        ForceGroupDisplayConfig config =
             ClientConfig.getForceGroupConfig(id);
 
         guiGraphics.drawString(
@@ -112,12 +114,12 @@ public class ForceGroupRow {
         int infoX = x + width - 45;
 
         if (mouseX >= vectorsX - 12 && mouseX <= vectorsX + 12) {
-            ClientConfig.toggleVectors(getId());
+            ConfigUtils.toggleVectors(getId());
             return true;
         }
 
         if (mouseX >= infoX - 12 && mouseX <= infoX + 12) {
-            ClientConfig.toggleInfo(getId());
+            ConfigUtils.toggleInfo(getId());
             return true;
         }
 

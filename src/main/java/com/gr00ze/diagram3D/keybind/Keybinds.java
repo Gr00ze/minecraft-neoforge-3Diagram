@@ -1,7 +1,8 @@
 package com.gr00ze.diagram3D.keybind;
 
-import com.gr00ze.diagram3D.ClientConfig;
+import com.gr00ze.diagram3D.config.ClientConfig;
 import com.gr00ze.diagram3D.Diagram3D;
+import com.gr00ze.diagram3D.config.ConfigUtils;
 import com.gr00ze.diagram3D.gui.DisplayConfigScreen;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.ChatFormatting;
@@ -58,7 +59,7 @@ public class Keybinds {
 
             } else {
                 // Pressione breve → toggle
-                ClientConfig.toggle(ClientConfig.ENABLED);
+                ConfigUtils.toggle(ClientConfig.ENABLED);
 
                 if (Minecraft.getInstance().player != null) {
                     Minecraft.getInstance().player.displayClientMessage(

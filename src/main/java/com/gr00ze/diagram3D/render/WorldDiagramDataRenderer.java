@@ -1,7 +1,9 @@
 package com.gr00ze.diagram3D.render;
 
-import com.gr00ze.diagram3D.ClientConfig;
+import com.gr00ze.diagram3D.config.ClientConfig;
 import com.gr00ze.diagram3D.Diagram3D;
+import com.gr00ze.diagram3D.config.ConfigUtils;
+import com.gr00ze.diagram3D.config.ForceGroupDisplayConfig;
 import com.gr00ze.diagram3D.data.DiagramRecords.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -19,9 +21,8 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 
-import static com.gr00ze.diagram3D.ClientConfig.*;
+import static com.gr00ze.diagram3D.config.ClientConfig.*;
 import static com.gr00ze.diagram3D.data.DiagramDataManager.diagramDataCache;
 
 @EventBusSubscriber(modid = Diagram3D.MOD_ID, value = Dist.CLIENT)
@@ -49,8 +50,8 @@ public class WorldDiagramDataRenderer {
             {
                 int forceGroupColorARGB = 0xFF000000 | forceGroup.color();
 
-                ClientConfig.ForceGroupDisplayConfig config =
-                    ClientConfig.getForceGroupConfig(ClientConfig.getForceGroupId(forceGroup));
+                ForceGroupDisplayConfig config =
+                    ClientConfig.getForceGroupConfig(ConfigUtils.getForceGroupId(forceGroup));
 
 
                 for (ResolvedForce pointForce : forceGroup.forces())
@@ -196,7 +197,7 @@ public class WorldDiagramDataRenderer {
     private static void drawInfo(MultiBufferSource.BufferSource buffer, Font font, PoseStack pose, Camera camera, ResolvedForce forceData, int color,
         Component forceName
     ) {
-        if (!DISPLAY_INFO_TAG.get()) return;
+        if (!DISPLAY_VECTORS_INFO.get()) return;
         String name = forceName.getString();
         String defaultText = " force of ";
         String value = String.format("%.2f pN", forceData.delta().length());
