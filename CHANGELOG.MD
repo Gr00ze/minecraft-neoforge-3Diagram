@@ -1,5 +1,15 @@
 # Changelog
 
+## V0.3.0 — Toggle Message, Bug Fixes, New Menu, Center of Mass Icon
+
+- Added an enable/disable message.
+- Fixed a rendering issue where some info backgrounds were not displayed.
+- Fixed an issue where info elements were rendered behind solid blocks.
+- Added a custom config menu, accessible by pressing the toggle key, to select which force group information to display.
+- Added a simpler way to display the center of mass.
+- Added a configuration persistency for the custom menu
+- Added more translations
+
 ## V0.2.0 — Force Group Display, Mass Display, Keybind
 
 - Added rendering for force group information.
