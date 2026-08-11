@@ -13,6 +13,14 @@
   "diagram3d.configuration.display_center_of_mass.tooltip": "The display center of the mass mode",
   "diagram3d.configuration.force_group_configs.tooltip": "Configure the display of individual force groups.\nPress the 'toggle key' inside a world to configure it",
 
+  "diagram3d.configuration.Rendering": "Rendering Section",
+  "diagram3d.configuration.Rendering.tooltip": "This section manage global rendering options",
+  "diagram3d.configuration.Rendering.button": "Open",
+
+  "diagram3d.configuration.Custom": "Custom Section",
+  "diagram3d.configuration.Custom.tooltip": "This section is not managed here",
+  "diagram3d.configuration.Custom.button": "Show",
+
   "diagram3d.configuration.title": "Diagram 3D Configuration",
 
   "diagram3d.configuration.section.diagram3d.client.toml.title": "Client Configuration",
