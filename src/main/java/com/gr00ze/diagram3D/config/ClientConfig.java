@@ -23,7 +23,8 @@ public class ClientConfig
     public enum CenterOfMassMode {
         DISABLED,
         ICON,
-        DETAILS
+        DETAILS,
+        ICON_DETAILS_ONLOOK
     }
 
     static final Map<ResourceLocation, ForceGroupDisplayConfig>

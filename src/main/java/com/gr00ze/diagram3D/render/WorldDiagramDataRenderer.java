@@ -263,25 +263,7 @@ public class WorldDiagramDataRenderer {
         // position = (end + start) / 2 = ((origin + delta)) + origin) / 2 = origin + delta / 2
         Vec3 position = origin.add(delta.scale(0.5 * FORCE_VISUAL_SCALE));
 
-        pose.pushPose();
-
-        float halfWidth = Math.max(nameWidth, valueWidth) * 0.5F + 4;
-        float halfHeight = font.lineHeight  + 3;
-
-        applyTransformations(pose, camera, position, cameraPosition);
-
-        Matrix4f matrix = pose.last().pose();
-
-        drawTextBackground(buffer, matrix, halfWidth, halfHeight);
-
-        drawText(
-            buffer,
-            font,
-            matrix,
-            nameText,
-            nameWidth,
-            font.lineHeight * 2
-        );
+        if (!isLooking(camera, forceData.origin(), forceData.delta())) {return;}//test
         drawInfoDisplay(buffer, font, pose, camera, position, nameComponent, valueComponent);
 
     }
@@ -322,10 +304,61 @@ public class WorldDiagramDataRenderer {
             drawCenterOfMassWithDetails(buffer, font, pose, camera, centerOfMass, mass);
             return;
         }
-        drawCenterOfMassIcon(buffer, font, pose, camera, centerOfMass);
+        if (display_center_of_mass.equals(CenterOfMassMode.ICON_DETAILS_ONLOOK)){
+            if(isLooking(camera, centerOfMass)){
+                drawCenterOfMassWithDetails(buffer, font, pose, camera, centerOfMass, mass);
+
+            } else {
+                drawCenterOfMassIcon(buffer, pose, camera, centerOfMass);
+            }
+            return;
+        }
         drawCenterOfMassIcon(buffer, pose, camera, centerOfMass);
 
     }
+
+    private static boolean isLooking(Camera camera, Vec3 position) {
+        Vec3 cameraPos = camera.getPosition();
+
+        Vector3f look = camera.getLookVector().normalize();
+        Vector3f direction = position.subtract(cameraPos).normalize().toVector3f();
+
+        double distance = cameraPos.distanceTo(position);
+
+        double angle = Math.atan(0.2 / Math.max(distance, 0.1));
+
+        double threshold = Math.cos(angle);
+
+        return look.dot(direction) >= threshold;
+    }
+
+    private static boolean isLooking(Camera camera, Vec3 startPosition, Vec3 delta) {
+        Vec3 cameraPos = camera.getPosition();
+
+        Vec3 lineDirection = delta.normalize();
+        Vec3 toStart = startPosition.subtract(cameraPos);
+
+        double deltaLength = delta.length();
+
+        double t = toStart.dot(lineDirection);
+
+        t = Math.max(0.0, Math.min(t, deltaLength));
+
+        Vec3 closestPoint = startPosition.add(lineDirection.scale(t));
+
+        double distance = cameraPos.distanceTo(closestPoint);
+
+        Vector3f look = camera.getLookVector().normalize();
+        Vector3f direction = closestPoint.subtract(cameraPos)
+            .normalize()
+            .toVector3f();
+
+        double angle = Math.atan(0.2 / Math.max(distance, 0.1));
+        double threshold = Math.cos(angle);
+
+        return look.dot(direction) >= threshold;
+    }
+
 
     private static void drawCenterOfMassWithDetails(MultiBufferSource.BufferSource buffer, Font font, PoseStack pose, Camera camera, Vec3 centerOfMass, double mass){
         Component text = coloredText("Center of mass",0xFFAA7733);

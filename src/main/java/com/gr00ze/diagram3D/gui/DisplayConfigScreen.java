@@ -100,6 +100,8 @@ public class DisplayConfigScreen extends Screen {
 
             case DETAILS ->
                 Component.literal("Details");
+            case ICON_DETAILS_ONLOOK ->
+                Component.literal("Dynamic Details");
         };
     }
 
@@ -111,7 +113,8 @@ public class DisplayConfigScreen extends Screen {
             switch (current) {
                 case DISABLED -> ClientConfig.CenterOfMassMode.ICON;
                 case ICON -> ClientConfig.CenterOfMassMode.DETAILS;
-                case DETAILS -> ClientConfig.CenterOfMassMode.DISABLED;
+                case DETAILS -> ClientConfig.CenterOfMassMode.ICON_DETAILS_ONLOOK;
+                case ICON_DETAILS_ONLOOK ->  ClientConfig.CenterOfMassMode.DISABLED;
             };
 
         ConfigUtils.setCenterOfMassMode(next);
