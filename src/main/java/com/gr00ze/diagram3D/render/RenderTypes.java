@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.RenderType;
 
 import java.util.OptionalDouble;
 
-
+//Render Types are bullshit since RenderSystem is the one who knocks...
 public class RenderTypes {
     public static RenderType FORCE_LINES =
         RenderType.create("lines_custom",
@@ -35,12 +35,39 @@ public class RenderTypes {
         RenderType.CompositeState.builder()
             .setShaderState(RenderStateShard.POSITION_COLOR_SHADER)
             .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
-            .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
-            .setCullState(RenderStateShard.NO_CULL)
             .setLightmapState(RenderStateShard.NO_LIGHTMAP)
             .setWriteMaskState(RenderStateShard.COLOR_WRITE)
+            .setCullState(RenderStateShard.NO_CULL)
+            .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
             .createCompositeState(false)
     );
+
+    public static RenderType TEST_RENDER_TYPE = null;
+
+    public static RenderType getTestRenderType() {
+        if (TEST_RENDER_TYPE == null) {
+            reloadTestRenderType();
+        }
+        return TEST_RENDER_TYPE;
+    }
+    public static void reloadTestRenderType() {
+        TEST_RENDER_TYPE = RenderType.create(
+            "test_render_type",
+            DefaultVertexFormat.POSITION_COLOR,
+            VertexFormat.Mode.QUADS,
+            256,
+            false,
+            false,
+            RenderType.CompositeState.builder()
+                .setShaderState(RenderStateShard.POSITION_COLOR_SHADER)
+                .setTransparencyState(RenderStateShard.NO_TRANSPARENCY)
+                .setLightmapState(RenderStateShard.NO_LIGHTMAP)
+                .setWriteMaskState(RenderStateShard.COLOR_WRITE)
+                .setCullState(RenderStateShard.NO_CULL)
+                .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
+                .createCompositeState(false)
+        );
+    }
 
     public static void init(){}
 }

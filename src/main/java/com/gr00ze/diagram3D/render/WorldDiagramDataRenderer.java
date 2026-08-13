@@ -5,6 +5,7 @@ import com.gr00ze.diagram3D.Diagram3D;
 import com.gr00ze.diagram3D.config.ConfigUtils;
 import com.gr00ze.diagram3D.config.ForceGroupDisplayConfig;
 import com.gr00ze.diagram3D.data.DiagramRecords.*;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
@@ -21,6 +22,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import static com.gr00ze.diagram3D.config.ClientConfig.*;
 import static com.gr00ze.diagram3D.data.DiagramDataManager.diagramDataCache;
@@ -30,6 +32,8 @@ public class WorldDiagramDataRenderer {
 
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event){
+
+        //System.out.println(event.getStage() + ":"+GL11.glGetInteger(GL11.GL_DEPTH_FUNC) + " " + GL11.glIsEnabled(GL11.GL_DEPTH_TEST));
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER)
             return;
 
@@ -43,6 +47,15 @@ public class WorldDiagramDataRenderer {
         Camera camera = mc.gameRenderer.getMainCamera();
         MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
 
+        RenderSystem.disableDepthTest();
+
+        drawData(buffer, mc, pose, camera);
+
+        RenderSystem.enableDepthTest();
+
+    }
+
+    private static void drawData(MultiBufferSource.BufferSource buffer, Minecraft mc, PoseStack pose, Camera camera) {
         for (DiagramDataCache cached : diagramDataCache.values())
         {
             drawCenterOfMass(buffer, mc.font, pose, camera, cached.centerOfMass(), cached.mass());
@@ -56,27 +69,23 @@ public class WorldDiagramDataRenderer {
 
                 for (ResolvedForce pointForce : forceGroup.forces())
                 {
-                    if(config.vectors())
-                        drawVector(
-                            buffer,
-                            pose, camera,
-                            pointForce, forceGroupColorARGB
-                        );
                     if(config.info())
-                        drawInfo(
-                            buffer, mc.font,
-                            pose, camera,
+                        drawVectorInfoDisplay(buffer, mc.font, pose, camera,
                             pointForce, forceGroupColorARGB, forceGroup.name()
                         );
+
+                    if(config.vectors())
+                        drawVector(buffer, pose, camera,
+                            pointForce, forceGroupColorARGB
+                        );
+
+
 
 
                 }
             }
 
         }
-
-
-
     }
 
 
@@ -192,9 +201,52 @@ public class WorldDiagramDataRenderer {
     }
 
 
+    private static void drawInfoDisplay(
+        MultiBufferSource.BufferSource buffer,
+        Font font,
+        PoseStack pose,
+        Camera camera,
+        Vec3 position,
+        Component ...components
+        ){
+
+        float maxWidth = 0;
+        for (Component component : components){
+            maxWidth = Math.max(maxWidth, font.width(component));
+        }
+        float rowHeight =  font.lineHeight  + 3; //3 of margin
+        float backgroundHeight = rowHeight * components.length;
+
+        Vec3 cameraPosition = camera.getPosition();
+        pose.pushPose();
+        applyTransformations(pose, camera, position, cameraPosition);
+        Matrix4f matrix = pose.last().pose();
+        drawTextBackground(buffer, matrix, maxWidth + 4, backgroundHeight);
+
+        float rowCount = 0;
+        for (Component component : components){
+            drawText(
+                buffer,
+                font,
+                matrix,
+                component,
+                -font.width(component)/2F,
+                font.lineHeight * (rowCount - 1) //Add a constant will move down all rows
+            );
+            rowCount+=1.2F;//Increase this will increase the row gap
+        }
+        pose.popPose();
 
 
-    private static void drawInfo(MultiBufferSource.BufferSource buffer, Font font, PoseStack pose, Camera camera, ResolvedForce forceData, int color,
+    }
+
+    private static void drawVectorInfoDisplay(
+        MultiBufferSource.BufferSource buffer,
+        Font font,
+        PoseStack pose,
+        Camera camera,
+        ResolvedForce forceData,
+        int color,
         Component forceName
     ) {
         if (!DISPLAY_VECTORS_INFO.get()) return;
@@ -202,25 +254,12 @@ public class WorldDiagramDataRenderer {
         String defaultText = " force of ";
         String value = String.format("%.2f pN", forceData.delta().length());
 
-        Component nameText = coloredText(name, color);
-        Component valueText = coloredText(defaultText + " ", 0xF7F0DD)
+        Component nameComponent = coloredText(name, color);
+        Component valueComponent = coloredText(defaultText + " ", 0xF7F0DD)
             .append(coloredText(value, 0xFFFFFF));
-
-//        Component nameText = Component.literal(name)
-//            .withStyle(style -> style.withColor(color));
-//
-//        Component valueText = Component.literal(defaultText + " ")
-//            .withStyle(style -> style.withColor(0xF7F0DD))
-//            .append(Component.literal(value)
-//                .withStyle(style -> style.withColor(0xFFFFFF)));
-
-        float nameWidth = font.width(nameText);
-        float valueWidth = font.width(valueText);
 
         Vec3 origin = forceData.origin(),
             delta = forceData.delta();
-        Vec3 cameraPosition = camera.getPosition();
-
         // position = (end + start) / 2 = ((origin + delta)) + origin) / 2 = origin + delta / 2
         Vec3 position = origin.add(delta.scale(0.5 * FORCE_VISUAL_SCALE));
 
@@ -243,17 +282,8 @@ public class WorldDiagramDataRenderer {
             nameWidth,
             font.lineHeight * 2
         );
+        drawInfoDisplay(buffer, font, pose, camera, position, nameComponent, valueComponent);
 
-        drawText(
-            buffer,
-            font,
-            matrix,
-            valueText,
-            valueWidth,
-            0
-        );
-
-        pose.popPose();
     }
 
     private static void applyTransformations(PoseStack pose, Camera camera, Vec3 position, Vec3 cameraPosition) {
@@ -270,13 +300,13 @@ public class WorldDiagramDataRenderer {
         );
     }
 
-    private static void drawTextBackground(MultiBufferSource.BufferSource buffer, Matrix4f matrix, float halfWidth, float halfHeight){
+    private static void drawTextBackground(MultiBufferSource.BufferSource buffer, Matrix4f matrix, float width, float height){
         VertexConsumer background = buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
 
         RenderUtils.drawQuad(
             background,
             matrix,
-            QuadPoints.centeredXY(halfWidth, halfHeight),
+            QuadPoints.centeredXY(width, height),
             0x993D3D3A,
             LightTexture.FULL_BRIGHT
         );
@@ -286,62 +316,25 @@ public class WorldDiagramDataRenderer {
 
 
     private static void drawCenterOfMass(MultiBufferSource.BufferSource buffer, Font font, PoseStack pose, Camera camera, Vec3 centerOfMass, double mass) {
-
-        if (DISPLAY_CENTER_OF_MASS.get().equals(CenterOfMassMode.DISABLED) ) return;
-        if (DISPLAY_CENTER_OF_MASS.get().equals(CenterOfMassMode.DETAILS) ) {
+        CenterOfMassMode display_center_of_mass = DISPLAY_CENTER_OF_MASS.get();
+        if (display_center_of_mass.equals(CenterOfMassMode.DISABLED) ) return;
+        if (display_center_of_mass.equals(CenterOfMassMode.DETAILS) ) {
             drawCenterOfMassWithDetails(buffer, font, pose, camera, centerOfMass, mass);
             return;
         }
         drawCenterOfMassIcon(buffer, font, pose, camera, centerOfMass);
+        drawCenterOfMassIcon(buffer, pose, camera, centerOfMass);
 
     }
 
     private static void drawCenterOfMassWithDetails(MultiBufferSource.BufferSource buffer, Font font, PoseStack pose, Camera camera, Vec3 centerOfMass, double mass){
-
-        VertexConsumer background = buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
-        Vec3 cameraPosition = camera.getPosition();
-
-        Component text = coloredText("Center of mass",0xFFAAAA00);
+        Component text = coloredText("Center of mass",0xFFAA7733);
         Component value = coloredText(String.format("%.2f Kpg", mass),0xFFFFFFFF);
+        drawInfoDisplay(buffer, font, pose, camera, centerOfMass, text, value);
 
-        float width = font.width(text) ;
-
-        pose.pushPose();
-        applyTransformations(pose, camera, centerOfMass, cameraPosition);
-        Matrix4f matrix = pose.last().pose();
-        RenderUtils.drawQuad(
-            background,
-            matrix,
-            QuadPoints.centeredXY(width * 0.5F + 4, font.lineHeight + 4),
-            0x993D3D3A,
-            LightTexture.FULL_BRIGHT
-        );
-
-
-
-        drawText(
-            buffer,
-            font,
-            matrix,
-            text,
-            width,
-            font.lineHeight * 2
-        );
-        drawText(
-            buffer,
-            font,
-            matrix,
-            value,
-            width,
-            0
-        );
-
-
-        pose.popPose();
     }
     private static void drawCenterOfMassIcon(
         MultiBufferSource.BufferSource buffer,
-        Font font,
         PoseStack pose,
         Camera camera,
         Vec3 centerOfMass
@@ -351,7 +344,8 @@ public class WorldDiagramDataRenderer {
 
         Vec3 cameraPosition = camera.getPosition();
 
-        final float halfSize = 4F;
+        float size = 8F;
+        final float halfSize = size * 0.5F;
         final float outline = 1F;
 
         int dark = 0xFF4A2F18;
@@ -369,17 +363,15 @@ public class WorldDiagramDataRenderer {
 
         Matrix4f matrix = pose.last().pose();
 
-        float megaHalfSize = halfSize * 2F;
-
-// outline/background leggermente più grande
+        // outline/background
         RenderUtils.drawQuad(
             background,
             matrix,
             QuadPoints.centeredXY(
                 0F,
                 0F,
-                megaHalfSize + outline,
-                megaHalfSize + outline
+                size + outline,
+                size + outline
             ),
             white,
             LightTexture.FULL_BRIGHT
@@ -447,11 +439,22 @@ public class WorldDiagramDataRenderer {
             .withStyle(style -> style.withColor(argb));
     }
 
+    public static void drawCenteredText(MultiBufferSource.BufferSource buffer, Font font, Matrix4f matrix, Component text, float width, float height){
+        drawText(
+            buffer,
+            font,
+            matrix,
+            text,
+            -width * 0.5F,
+            -height * 0.5F
+        );
+
+    }
     public static void drawText(MultiBufferSource.BufferSource buffer, Font font, Matrix4f matrix, Component text, float width, float height){
         font.drawInBatch(
             text,
-            -width * 0.5F,
-            -height * 0.5F,
+            width,
+            height,
             0xFFFFFFFF,
             false,
             matrix,
