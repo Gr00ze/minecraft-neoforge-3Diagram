@@ -16,9 +16,11 @@ public class ForceGroupRow {
     private static final int INACTIVE_COLOR = 0xFF888888;
 
     private final ForceGroup forceGroup;
+    private final int rowHeight;
 
-    public ForceGroupRow(ForceGroup forceGroup) {
+    public ForceGroupRow(ForceGroup forceGroup, int rowHeight) {
         this.forceGroup = forceGroup;
+        this.rowHeight = rowHeight;
     }
 
     public void render(
@@ -44,6 +46,8 @@ public class ForceGroupRow {
             y + 7,
             forceGroup.color()
         );
+
+        guiGraphics.hLine(x + 10  ,x + width - 10, y + rowHeight * 3 / 2, 0x99999999);
 
         int vectorsX = x + width - 100;
         int infoX = x + width - 45;
@@ -113,12 +117,20 @@ public class ForceGroupRow {
         int vectorsX = x + width - 100;
         int infoX = x + width - 45;
 
-        if (mouseX >= vectorsX - 12 && mouseX <= vectorsX + 12) {
+        if (
+            mouseX >= vectorsX - 12
+            && mouseX <= vectorsX + 12
+
+        ) {
             ConfigUtils.toggleVectors(getId());
             return true;
         }
 
-        if (mouseX >= infoX - 12 && mouseX <= infoX + 12) {
+        if (
+            mouseX >= infoX - 12
+            && mouseX <= infoX + 12
+
+        ) {
             ConfigUtils.toggleInfo(getId());
             return true;
         }
@@ -134,8 +146,8 @@ public class ForceGroupRow {
     ) {
         return mouseX >= centerX - 12
             && mouseX <= centerX + 12
-            && mouseY >= y
-            && mouseY <= y + 12;
+            && mouseY >= y + 7
+            && mouseY <= y + rowHeight + 5;
     }
 
     private ResourceLocation getId() {

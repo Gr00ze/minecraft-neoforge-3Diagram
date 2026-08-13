@@ -10,6 +10,7 @@ import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @EventBusSubscriber(modid = Diagram3D.MOD_ID)
 public class ClientConfig
@@ -26,7 +27,7 @@ public class ClientConfig
     }
 
     static final Map<ResourceLocation, ForceGroupDisplayConfig>
-        FORCE_GROUP_CONFIGS = new HashMap<>();
+        FORCE_GROUP_CONFIGS = new ConcurrentHashMap<>();
 
 
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();

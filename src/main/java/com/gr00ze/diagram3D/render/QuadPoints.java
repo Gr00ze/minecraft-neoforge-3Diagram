@@ -42,7 +42,9 @@ public class QuadPoints {
      * |          |
      * 3 -------- 2
      */
-    public static QuadPoints centeredXY(float halfWidth, float halfHeight) {
+    public static QuadPoints centeredXY(float width, float height) {
+        float halfWidth = width / 2;
+        float halfHeight = height / 2;
         return QuadPoints.create()
             .add(-halfWidth, halfHeight, 0)
             .add( halfWidth, halfHeight, 0)
