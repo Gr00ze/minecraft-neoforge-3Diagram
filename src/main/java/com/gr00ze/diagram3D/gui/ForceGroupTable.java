@@ -36,7 +36,7 @@ public class ForceGroupTable extends AbstractScrollWidget {
         rows.clear();
 
         for (ForceGroup forceGroup : ForceGroups.REGISTRY) {
-            rows.add(new ForceGroupRow(forceGroup));
+            rows.add(new ForceGroupRow(forceGroup, rowHeight));
         }
     }
 
@@ -141,7 +141,7 @@ public class ForceGroupTable extends AbstractScrollWidget {
             return false;
         }
 
-        double contentY = mouseY - this.getY() + this.scrollAmount();
+        double contentY = mouseY - this.getY() + this.scrollAmount() - 7;
 
         int rowIndex = (int) (contentY / rowHeight) - 1; // -1 per header
 
