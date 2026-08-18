@@ -35,10 +35,12 @@ public class QuadPoints {
         return points;
     }
 
-    /** Create a centered quad
+
+    /** Create a centered quad supposing that it will be drawn from the center
      * Order:
      * 0 -------- 1
      * |          |
+     * |     *    |
      * |          |
      * 3 -------- 2
      */
@@ -51,7 +53,14 @@ public class QuadPoints {
             .add( halfWidth, -halfHeight, 0)
             .add(-halfWidth, -halfHeight, 0);
     }
-
+    /** Create a centered quad supposing that it will be drawn from the center translated by centerX and centerY
+     * Order:
+     * 0 -------- 1
+     * |          |
+     * |     *    |
+     * |          |
+     * 3 -------- 2
+     */
     public static QuadPoints centeredXY(
         float centerX,
         float centerY,
