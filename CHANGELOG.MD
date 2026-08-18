@@ -1,5 +1,11 @@
 # Changelog
 
+## V0.3.1 — Display on look
+
+-Added details on look option for center of mass
+-Added details on look option for all force group information.
+-Added auto positioning for force group details when set to on look
+
 ## V0.3.0 — Toggle Message, Bug Fixes, New Menu, Center of Mass Icon
 
 - Added an enable/disable message.
