@@ -6,6 +6,8 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
+import static com.gr00ze.diagram3D.config.ClientConfig.FORCE_VISUAL_SCALE;
+
 public class RenderUtils {
 
     public static void drawPositionColorLine(
@@ -50,5 +52,9 @@ public class RenderUtils {
                 .setColor(argb)
                 .setLight(packedLight);
         }
+    }
+
+    public static Vec3 getScaledDelta(Vec3 original){
+        return original.scale(FORCE_VISUAL_SCALE);
     }
 }
