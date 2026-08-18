@@ -31,6 +31,11 @@ public class ClientConfig
         ALWAYS,
         ON_LOOK
     }
+    public enum VectorMode {
+        DISABLED,
+        ENABLED,
+
+    }
 
 
     static final Map<ResourceLocation, ForceGroupDisplayConfig>
@@ -45,7 +50,7 @@ public class ClientConfig
     public static final ModConfigSpec.BooleanValue ENABLED = BUILDER
         .comment("Enable the entire mod")
         .define("enabled", true);
-    public static final ModConfigSpec.BooleanValue DISPLAY_VECTORS;
+    public static final ModConfigSpec.EnumValue<VectorMode> DISPLAY_VECTORS;
     public static final ModConfigSpec.EnumValue<VectorInfoMode> DISPLAY_VECTORS_INFO;
     public static final ModConfigSpec.EnumValue<CenterOfMassMode> DISPLAY_CENTER_OF_MASS;
     public static final ModConfigSpec.ConfigValue<Config> FORCE_GROUP_CONFIGS_VALUE;
@@ -55,7 +60,7 @@ public class ClientConfig
 
         DISPLAY_VECTORS = BUILDER
             .comment("Enable the vector rendering")
-            .define("display_vectors", true);
+            .defineEnum("display_vectors", VectorMode.ENABLED);
 
         DISPLAY_VECTORS_INFO = BUILDER
             .comment("Display vector info rendering mode")
