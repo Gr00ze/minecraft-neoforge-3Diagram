@@ -26,6 +26,12 @@ public class ClientConfig
         DETAILS,
         ICON_DETAILS_ONLOOK
     }
+    public enum VectorInfoMode {
+        DISABLED,
+        ALWAYS,
+        ON_LOOK
+    }
+
 
     static final Map<ResourceLocation, ForceGroupDisplayConfig>
         FORCE_GROUP_CONFIGS = new ConcurrentHashMap<>();
@@ -40,7 +46,7 @@ public class ClientConfig
         .comment("Enable the entire mod")
         .define("enabled", true);
     public static final ModConfigSpec.BooleanValue DISPLAY_VECTORS;
-    public static final ModConfigSpec.BooleanValue DISPLAY_VECTORS_INFO;
+    public static final ModConfigSpec.EnumValue<VectorInfoMode> DISPLAY_VECTORS_INFO;
     public static final ModConfigSpec.EnumValue<CenterOfMassMode> DISPLAY_CENTER_OF_MASS;
     public static final ModConfigSpec.ConfigValue<Config> FORCE_GROUP_CONFIGS_VALUE;
 
@@ -52,14 +58,14 @@ public class ClientConfig
             .define("display_vectors", true);
 
         DISPLAY_VECTORS_INFO = BUILDER
-            .comment("Enable the display vector info rendering")
-            .define("display_vectors_info", true);
+            .comment("Display vector info rendering mode")
+            .defineEnum("display_vectors_info", VectorInfoMode.ON_LOOK);
 
         DISPLAY_CENTER_OF_MASS = BUILDER
-            .comment("The display center of the mass mode")
+            .comment("Display center of the mass mode")
             .defineEnum(
                 "display_center_of_mass",
-                CenterOfMassMode.DETAILS
+                CenterOfMassMode.ICON_DETAILS_ONLOOK
             );
         BUILDER.pop();
         BUILDER.push("Custom");
