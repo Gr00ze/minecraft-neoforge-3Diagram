@@ -26,6 +26,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -282,7 +283,7 @@ public class WorldDiagramDataRenderer {
 
     }
 
-    private static GeometryUtils.ClosestPoints getLookingPoints(
+    private static @Nullable GeometryUtils.ClosestPoints getLookingPoints(
         Camera camera,
         Vec3 startPosition,
         Vec3 delta
