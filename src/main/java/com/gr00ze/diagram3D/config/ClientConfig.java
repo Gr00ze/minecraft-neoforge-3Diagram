@@ -33,7 +33,8 @@ public class ClientConfig
     }
     public enum VectorMode {
         DISABLED,
-        ENABLED,
+        SEPARATED,
+        MERGED
 
     }
 
@@ -60,7 +61,7 @@ public class ClientConfig
 
         DISPLAY_VECTORS = BUILDER
             .comment("Enable the vector rendering")
-            .defineEnum("display_vectors", VectorMode.ENABLED);
+            .defineEnum("display_vectors", VectorMode.SEPARATED);
 
         DISPLAY_VECTORS_INFO = BUILDER
             .comment("Display vector info rendering mode")
