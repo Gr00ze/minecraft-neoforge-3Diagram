@@ -6,7 +6,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import static com.gr00ze.diagram3D.config.ClientConfig.FORCE_VISUAL_SCALE;
+import static com.gr00ze.diagram3D.config.ClientConfig.*;
 
 public class RenderUtils {
 
@@ -54,7 +54,17 @@ public class RenderUtils {
         }
     }
 
-    public static Vec3 getScaledDelta(Vec3 original){
-        return original.scale(FORCE_VISUAL_SCALE);
+    public static Vec3 getScaledDelta(Vec3 original) {
+        double x = original.length();
+
+        if (x == 0.0) {
+            return Vec3.ZERO;
+        }
+
+        double targetLength =
+            x * x * QUADRATIC_VECTOR_SCALING_FACTOR.get()
+                + x * PROPORTIONAL_VECTOR_SCALING_FACTOR.get();
+
+        return original.normalize().scale(targetLength);
     }
 }

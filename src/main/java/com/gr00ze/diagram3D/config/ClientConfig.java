@@ -18,7 +18,6 @@ public class ClientConfig
 
     public static final int UPDATE_REQUEST_TICK_INTERVAL = 1;
     public static final long TIMEOUT_RENDER_TICKS = 20;
-    public static final double FORCE_VISUAL_SCALE = 0.05;
 
     public enum CenterOfMassMode {
         DISABLED,
@@ -39,6 +38,7 @@ public class ClientConfig
     }
 
 
+
     static final Map<ResourceLocation, ForceGroupDisplayConfig>
         FORCE_GROUP_CONFIGS = new ConcurrentHashMap<>();
 
@@ -56,6 +56,8 @@ public class ClientConfig
     public static final ModConfigSpec.EnumValue<VectorInfoMode> DISPLAY_VECTORS_INFO;
     public static final ModConfigSpec.EnumValue<CenterOfMassMode> DISPLAY_CENTER_OF_MASS;
     public static final ModConfigSpec.ConfigValue<Config> FORCE_GROUP_CONFIGS_VALUE;
+    public static final ModConfigSpec.DoubleValue PROPORTIONAL_VECTOR_SCALING_FACTOR;
+    public static final ModConfigSpec.DoubleValue QUADRATIC_VECTOR_SCALING_FACTOR;
 
     static {
         BUILDER.push("Rendering");
@@ -91,6 +93,9 @@ public class ClientConfig
             );
 
         BUILDER.pop();
+
+        PROPORTIONAL_VECTOR_SCALING_FACTOR = BUILDER.defineInRange("proportional_vector_scaling_factor", 0.05F, 0F, 1F);
+        QUADRATIC_VECTOR_SCALING_FACTOR = BUILDER.defineInRange("quadratic_vector_scaling_factor", 0.1F, 0F, 1F);
     }
 
 
