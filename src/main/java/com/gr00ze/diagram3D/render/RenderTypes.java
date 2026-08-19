@@ -24,6 +24,21 @@ public class RenderTypes {
                 .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
                 .createCompositeState(false));
 
+    public static RenderType FORCE_OUT_LINES =
+        RenderType.create("lines_custom2",
+            DefaultVertexFormat.POSITION_COLOR_NORMAL,
+            VertexFormat.Mode.LINES,
+            1536,
+            RenderType.CompositeState.builder()
+                .setShaderState(RenderStateShard.RENDERTYPE_LINES_SHADER)
+                .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(8)))
+                .setLayeringState(RenderStateShard.VIEW_OFFSET_Z_LAYERING)
+                .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                .setWriteMaskState(RenderStateShard.COLOR_WRITE)
+                .setCullState(RenderStateShard.NO_CULL)
+                .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
+                .createCompositeState(false));
+
 
     public static final RenderType BACKGROUND_QUADS = RenderType.create(
         "3d_display_background",

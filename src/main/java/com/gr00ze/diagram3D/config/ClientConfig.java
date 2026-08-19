@@ -18,7 +18,6 @@ public class ClientConfig
 
     public static final int UPDATE_REQUEST_TICK_INTERVAL = 1;
     public static final long TIMEOUT_RENDER_TICKS = 20;
-    public static final double FORCE_VISUAL_SCALE = 0.05;
 
     public enum CenterOfMassMode {
         DISABLED,
@@ -33,9 +32,11 @@ public class ClientConfig
     }
     public enum VectorMode {
         DISABLED,
-        ENABLED,
+        SEPARATED,
+        MERGED
 
     }
+
 
 
     static final Map<ResourceLocation, ForceGroupDisplayConfig>
@@ -51,16 +52,23 @@ public class ClientConfig
         .comment("Enable the entire mod")
         .define("enabled", true);
     public static final ModConfigSpec.EnumValue<VectorMode> DISPLAY_VECTORS;
+    public static final ModConfigSpec.BooleanValue DISPLAY_VECTOR_OUTLINE;
     public static final ModConfigSpec.EnumValue<VectorInfoMode> DISPLAY_VECTORS_INFO;
     public static final ModConfigSpec.EnumValue<CenterOfMassMode> DISPLAY_CENTER_OF_MASS;
     public static final ModConfigSpec.ConfigValue<Config> FORCE_GROUP_CONFIGS_VALUE;
+    public static final ModConfigSpec.DoubleValue PROPORTIONAL_VECTOR_SCALING_FACTOR;
+    public static final ModConfigSpec.DoubleValue QUADRATIC_VECTOR_SCALING_FACTOR;
 
     static {
         BUILDER.push("Rendering");
 
         DISPLAY_VECTORS = BUILDER
             .comment("Enable the vector rendering")
-            .defineEnum("display_vectors", VectorMode.ENABLED);
+            .defineEnum("display_vectors", VectorMode.SEPARATED);
+
+        DISPLAY_VECTOR_OUTLINE = BUILDER
+            .comment("Enable a white outline for all vectors")
+            .define("display_vectors_outline", true);
 
         DISPLAY_VECTORS_INFO = BUILDER
             .comment("Display vector info rendering mode")
@@ -85,6 +93,9 @@ public class ClientConfig
             );
 
         BUILDER.pop();
+
+        PROPORTIONAL_VECTOR_SCALING_FACTOR = BUILDER.defineInRange("proportional_vector_scaling_factor", 0.05F, 0F, 1F);
+        QUADRATIC_VECTOR_SCALING_FACTOR = BUILDER.defineInRange("quadratic_vector_scaling_factor", 0.1F, 0F, 1F);
     }
 
 

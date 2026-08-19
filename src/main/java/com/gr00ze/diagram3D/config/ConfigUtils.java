@@ -4,6 +4,7 @@ import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.InMemoryFormat;
 import com.electronwill.nightconfig.core.UnmodifiableConfig;
 import com.gr00ze.diagram3D.data.DiagramRecords;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -47,7 +48,13 @@ public class ConfigUtils {
     public static @Nullable ResourceLocation getForceGroupId(
         DiagramRecords.ResolvedForceGroup forceGroup
     ) {
-        if (!(forceGroup.name().getContents()
+        return getForceGroupId(forceGroup.name());
+    }
+
+    public static @Nullable ResourceLocation getForceGroupId(
+        Component forceGroupName
+    ) {
+        if (!(forceGroupName.getContents()
             instanceof TranslatableContents contents)) {
             return null;
         }

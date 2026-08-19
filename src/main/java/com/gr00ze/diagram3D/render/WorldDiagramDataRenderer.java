@@ -22,46 +22,30 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.gr00ze.diagram3D.config.ClientConfig.*;
 import static com.gr00ze.diagram3D.data.DiagramDataManager.diagramDataCache;
 import static com.gr00ze.diagram3D.render.RenderUtils.getScaledDelta;
+import static com.gr00ze.diagram3D.render.RenderPreparation.PreparedForce;
+import static com.gr00ze.diagram3D.render.RenderPreparation.PreparedGroup;
+import static com.gr00ze.diagram3D.render.RenderPreparation.InformationDisplay;
+import static com.gr00ze.diagram3D.render.RenderPreparation.IconDisplay;
+import static com.gr00ze.diagram3D.render.RenderPreparation.LookingForce;
+import static com.gr00ze.diagram3D.render.RenderPreparation.PreparedDiagram;
+
 
 @EventBusSubscriber(modid = Diagram3D.MOD_ID, value = Dist.CLIENT)
 public class WorldDiagramDataRenderer {
-
-    private record InformationDisplay(
-        Vec3 position,
-        List<Component> components
-    ) {}
-
-    private record VectorDisplay(
-        ResolvedForce force,
-        int color
-    ) {}
-    private record IconDisplay(
-        Vec3 position
-    ) {}
-
-    private record PreparedData(
-        List<VectorDisplay> vectors,
-        List<InformationDisplay> information,
-        List<IconDisplay> icons
-    ) {}
-
-    private record LookingForce(
-        ResolvedForce force,
-        ResolvedForceGroup group,
-        Vec3 position,
-        double rayParameter
-    ) {}
 
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event){
@@ -82,46 +66,59 @@ public class WorldDiagramDataRenderer {
 
         RenderSystem.disableDepthTest();
 
-        PreparedData preparedData = prepareData(camera);
+        RenderPreparation renderPreparation = prepareData(camera);
 
-        drawData(buffer, mc, pose, camera, preparedData);
+        drawData(buffer, mc, pose, camera, renderPreparation);
 
         RenderSystem.enableDepthTest();
 
     }
 
-    private static PreparedData prepareData(Camera camera) {
-        List<VectorDisplay> preparedVectors = new ArrayList<>();
-        List<InformationDisplay> preparedDisplayInfo = new ArrayList<>();
-        List<IconDisplay> preparedIcons = new ArrayList<>();
+    private static RenderPreparation prepareData(Camera camera) {
+
+        RenderPreparation renderPreparation = new RenderPreparation();
+
+        loadForceGroupConfig(renderPreparation);
+
 
         VectorMode displayVectors = DISPLAY_VECTORS.get();
         switch (displayVectors) {
-            case ENABLED -> prepareAllVectors(preparedVectors);
+            case SEPARATED -> prepareSeparatedVectors(renderPreparation);
+            case MERGED -> prepareMergedVectors(renderPreparation);
             case DISABLED -> {}
         }
 
         VectorInfoMode vMode = DISPLAY_VECTORS_INFO.get();
         switch (vMode) {
-            case ALWAYS -> prepareAllVectorInfo(preparedDisplayInfo, camera);
-            case ON_LOOK -> prepareLookingVectorInfo(preparedDisplayInfo, camera);
+            case ALWAYS -> prepareAllVectorInfo(renderPreparation, camera);
+            case ON_LOOK -> prepareLookingVectorInfo(renderPreparation, camera);
             case DISABLED -> {}
         }
 
         CenterOfMassMode cMode = DISPLAY_CENTER_OF_MASS.get();
         switch (cMode){
-            case ICON -> prepareIcon(preparedIcons, camera);
-            case DETAILS -> prepareMassDetails(preparedDisplayInfo, camera);
-            case ICON_DETAILS_ONLOOK -> prepareLookingMassInfo(preparedDisplayInfo, preparedIcons, camera);
+            case ICON -> prepareIcon(renderPreparation, camera);
+            case DETAILS -> prepareMassDetails(renderPreparation, camera);
+            case ICON_DETAILS_ONLOOK -> prepareLookingMassInfo(renderPreparation, camera);
             case DISABLED -> {}
         }
 
 
-        return new PreparedData(preparedVectors, preparedDisplayInfo, preparedIcons);
+        return renderPreparation;
     }
 
-    private static void prepareAllVectors(List<VectorDisplay> preparedVectors) {
+    /**
+     * Loads the force groups from the diagram cache and associates each forceGroup
+     * with its display configuration.
+     */
+    private static void loadForceGroupConfig(
+        RenderPreparation renderPreparation
+    ) {
         for (DiagramDataCache cached : diagramDataCache.values()) {
+
+            List<RenderPreparation.PreparedGroup> preparedGroups =
+                new ArrayList<>();
+
             for (ResolvedForceGroup forceGroup : cached.groups()) {
 
                 ForceGroupDisplayConfig config =
@@ -129,153 +126,233 @@ public class WorldDiagramDataRenderer {
                         ConfigUtils.getForceGroupId(forceGroup)
                     );
 
-                if (!config.vectors()) {
-                    continue;
-                }
-
-                int color = 0xFF000000 | forceGroup.color();
-                for (var force: forceGroup.forces()) {
-                    preparedVectors.add(new VectorDisplay(force, color));
-                }
-
+                preparedGroups.add(
+                    new RenderPreparation.PreparedGroup(
+                        forceGroup,
+                        config
+                    )
+                );
             }
+
+            renderPreparation.diagrams.add(
+                new RenderPreparation.PreparedDiagram(
+                    cached.mass(),
+                    cached.centerOfMass(),
+                    preparedGroups
+                )
+            );
         }
     }
 
-    private static void prepareAllVectorInfo(List<InformationDisplay> preparedDisplayInfo, Camera camera) {
-        for (DiagramDataCache cached : diagramDataCache.values()) {
-            for (ResolvedForceGroup forceGroup : cached.groups()) {
+    private static void prepareMergedVectors(RenderPreparation renderPreparation) {
 
-                ForceGroupDisplayConfig config =
-                    ClientConfig.getForceGroupConfig(
-                        ConfigUtils.getForceGroupId(forceGroup)
-                    );
+        final double DIRECTION_THRESHOLD = 0.999;
 
-                if (!config.info()) {
-                    continue;
-                }
+        for (PreparedDiagram diagram : renderPreparation.diagrams) {
+            for (PreparedGroup preparedGroup : diagram.groups()) {
 
-                String name = forceGroup.name().getString();
-                String defaultText = " force of ";
+                int color = 0xFF000000 | preparedGroup.forceGroup().color();
+                List<ResolvedForce> forces = preparedGroup.forceGroup().forces();
 
-                Component nameComponent = coloredText(name, 0xFF000000 | forceGroup.color());
+                Set<Integer> mergedIndices = new HashSet<>();
 
-                for (var force: forceGroup.forces()) {
+                for (int i = 0; i < forces.size(); i++) {
 
-                    String value = String.format("%.2f pN", force.delta().length());
-                    Component valueComponent = coloredText(defaultText + " ", 0xF7F0DD)
-                        .append(coloredText(value, 0xFFFFFF));
-
-
-                    List<Component> components = new ArrayList<>();
-                    components.add(nameComponent);
-                    components.add(valueComponent);
-
-                    preparedDisplayInfo.add(new InformationDisplay(force.origin().add(getScaledDelta(force.delta()).scale(0.5)), components));
-                }
-
-            }
-        }
-    }
-
-    private static void prepareLookingVectorInfo(List<InformationDisplay> preparedDisplayInfo, Camera camera) {
-        LookingForce bestForce = null;
-
-        for (DiagramDataCache cached : diagramDataCache.values()) {
-            for (ResolvedForceGroup forceGroup : cached.groups()) {
-
-                ForceGroupDisplayConfig config =
-                    ClientConfig.getForceGroupConfig(
-                        ConfigUtils.getForceGroupId(forceGroup)
-                    );
-
-                if (!config.info()) {
-                    continue;
-                }
-
-                for (ResolvedForce force : forceGroup.forces()) {
-
-                    GeometryUtils.ClosestPoints closestPoints =
-                        getLookingPoints(
-                            camera,
-                            force.origin(),
-                            force.delta()
-                        );
-
-                    if (closestPoints == null) {
+                    if (mergedIndices.contains(i)) {
                         continue;
                     }
 
-                    LookingForce candidate = new LookingForce(
-                        force,
-                        forceGroup,
-                        closestPoints.pointB(),
-                        closestPoints.parameterA()
-                    );
+                    ResolvedForce force = forces.get(i);
+                    Vec3 direction = force.delta().normalize();
 
-                    if (bestForce == null
-                        || candidate.rayParameter()
-                        < bestForce.rayParameter()) {
+                    Vec3 positionSum = force.origin();
+                    Vec3 deltaSum = force.delta();
 
-                        bestForce = candidate;
+                    int count = 1;
+                    mergedIndices.add(i);
+
+                    for (int j = i + 1; j < forces.size(); j++) {
+
+                        if (mergedIndices.contains(j)) {
+                            continue;
+                        }
+
+                        ResolvedForce other = forces.get(j);
+                        Vec3 otherDirection = other.delta().normalize();
+
+                        if (direction.dot(otherDirection)
+                            >= DIRECTION_THRESHOLD) {
+
+                            positionSum = positionSum.add(other.origin());
+                            deltaSum = deltaSum.add(other.delta());
+
+                            count++;
+                            mergedIndices.add(j);
+                        }
                     }
+
+                    Vec3 averagePosition =
+                        positionSum.scale(1.0 / count);
+
+                    ResolvedForce mergedForce =
+                        new ResolvedForce(
+                            averagePosition,
+                            deltaSum
+                        );
+
+                    renderPreparation.vectors.add(
+                        new PreparedForce(
+                            mergedForce.origin(),
+                            mergedForce.delta(),
+                            color,
+                            preparedGroup.forceGroup().name(),
+                            preparedGroup.config()
+                        )
+                    );
                 }
             }
+        }
+    }
+
+    private static void prepareSeparatedVectors(RenderPreparation renderPreparation) {
+
+        for (RenderPreparation.PreparedDiagram preparedDiagram : renderPreparation.diagrams) {
+
+            for (PreparedGroup forceGroup : preparedDiagram.groups()) {
+
+                int color = 0xFF000000 | forceGroup.forceGroup().color();
+                for (var force: forceGroup.forceGroup().forces()) {
+                    renderPreparation.vectors.add(new PreparedForce(
+                        force.origin(),
+                        force.delta(),
+                        color,
+                        forceGroup.forceGroup().name(),
+                        forceGroup.config()
+                    ));
+                }
+
+            }
+        }
+    }
+
+    private static void prepareAllVectorInfo(RenderPreparation renderPreparation, Camera camera) {
+        for (PreparedForce prepared : renderPreparation.vectors) {
+
+            ForceGroupDisplayConfig config =
+                prepared.config();
+
+            if (!config.info()) {
+                continue;
+            }
+
+            List<Component> components = createVectorInfoComponents(prepared);
+
+            renderPreparation.information.add(new InformationDisplay(prepared.origin().add(getScaledDelta(prepared.delta()).scale(0.5)), components));
+
+
+
+        }
+    }
+
+    private static @NotNull List<Component> createVectorInfoComponents(PreparedForce prepared) {
+        String name = prepared.name().getString();
+        String defaultText = " force of ";
+
+        Component nameComponent = coloredText(name, 0xFF000000 | prepared.color());
+
+        String value = String.format("%.2f pN", prepared.delta().length());
+        Component valueComponent = coloredText(defaultText + " ", 0xF7F0DD)
+            .append(coloredText(value, 0xFFFFFF));
+
+
+        List<Component> components = new ArrayList<>();
+        components.add(nameComponent);
+        components.add(valueComponent);
+        return components;
+    }
+
+    private static void prepareLookingVectorInfo(RenderPreparation renderPreparation, Camera camera) {
+        LookingForce bestForce = null;
+
+        for (PreparedForce prepared : renderPreparation.vectors) {
+
+
+
+                if (!prepared.config().info()) {
+                    continue;
+                }
+
+
+
+                GeometryUtils.ClosestPoints closestPoints =
+                    getLookingPoints(
+                        camera,
+                        prepared.origin(),
+                        prepared.delta()
+                    );
+
+                if (closestPoints == null) {
+                    continue;
+                }
+
+                LookingForce candidate = new LookingForce(
+                    prepared,
+                    closestPoints.pointB(),
+                    closestPoints.parameterA()
+                );
+
+                if (bestForce == null
+                    || candidate.rayParameter()
+                    < bestForce.rayParameter()) {
+
+                    bestForce = candidate;
+                }
+
+
         }
 
         if (bestForce == null) {
             return;
         }
 
-        String name = bestForce.group.name().getString();
-        String defaultText = " force of ";
-        String value = String.format("%.2f pN", bestForce.force().delta().length());
-        Component nameComponent = coloredText(name, 0xFF000000 | bestForce.group.color());
-        Component valueComponent = coloredText(defaultText + " ", 0xF7F0DD)
-            .append(coloredText(value, 0xFFFFFF));
+        List<Component> components = createVectorInfoComponents(bestForce.vector());
 
+        renderPreparation.information.add(new InformationDisplay(bestForce.position(), components));
+
+    }
+
+    private static void prepareIcon(RenderPreparation renderPreparation, Camera camera) {
+        for (PreparedDiagram preparedDiagram : renderPreparation.diagrams) {
+            renderPreparation.icons.add(new IconDisplay(preparedDiagram.centerOfMass()));
+        }
+    }
+
+    private static void prepareMassDetail(RenderPreparation renderPreparation, PreparedDiagram preparedDiagram) {
+        Component text = coloredText("Center of mass",0xFFAA7733);
+        Component value = coloredText(String.format("%.2f Kpg", preparedDiagram.mass()),0xFFFFFFFF);
         List<Component> components = new ArrayList<>();
-        components.add(nameComponent);
-        components.add(valueComponent);
-
-        preparedDisplayInfo.add(new InformationDisplay(bestForce.position, components));
-
+        components.add(text);
+        components.add(value);
+        renderPreparation.information.add(new InformationDisplay(preparedDiagram.centerOfMass(), components));
     }
 
-    private static void prepareIcon(List<IconDisplay> preparedIcons, Camera camera) {
-        for (DiagramDataCache cached : diagramDataCache.values()) {
-            preparedIcons.add(new IconDisplay(cached.centerOfMass()));
+    private static void prepareMassDetails(RenderPreparation renderPreparation, Camera camera) {
+        for (PreparedDiagram preparedDiagram : renderPreparation.diagrams) {
+
+            prepareMassDetail(renderPreparation, preparedDiagram);
         }
     }
 
-    private static void prepareMassDetails(List<InformationDisplay> preparedDisplayInfo, Camera camera) {
-        for (DiagramDataCache cached : diagramDataCache.values()) {
+    private static void prepareLookingMassInfo(RenderPreparation renderPreparation, Camera camera) {
 
-            Component text = coloredText("Center of mass",0xFFAA7733);
-            Component value = coloredText(String.format("%.2f Kpg", cached.mass()),0xFFFFFFFF);
-            List<Component> components = new ArrayList<>();
-            components.add(text);
-            components.add(value);
-            preparedDisplayInfo.add(new InformationDisplay(cached.centerOfMass(), components));
-        }
-    }
-
-    private static void prepareLookingMassInfo(List<InformationDisplay> preparedDisplayInfo, List<IconDisplay> preparedIcons, Camera camera) {
-
-        for (DiagramDataCache cached : diagramDataCache.values()) {
-            Vec3 centerOfMass = cached.centerOfMass();
+        for (PreparedDiagram preparedDiagram : renderPreparation.diagrams) {
+            Vec3 centerOfMass = preparedDiagram.centerOfMass();
 
             if(isPlayerLooking(camera, centerOfMass)) {
-                Component text = coloredText("Center of mass",0xFFAA7733);
-                Component value = coloredText(String.format("%.2f Kpg", cached.mass()),0xFFFFFFFF);
-                List<Component> components = new ArrayList<>();
-                components.add(text);
-                components.add(value);
-
-                preparedDisplayInfo.add(new InformationDisplay(centerOfMass, components));
+                prepareMassDetail(renderPreparation, preparedDiagram);
 
             }else {
-                preparedIcons.add(new IconDisplay(centerOfMass));
+                renderPreparation.icons.add(new IconDisplay(centerOfMass));
             }
 
 
@@ -316,18 +393,22 @@ public class WorldDiagramDataRenderer {
     }
 
 
-    private static void drawData(MultiBufferSource.BufferSource buffer, Minecraft mc, PoseStack pose, Camera camera, PreparedData preparedData) {
-        for (VectorDisplay vectorDisplay : preparedData.vectors) {
+    private static void drawData(MultiBufferSource.BufferSource buffer, Minecraft mc, PoseStack pose, Camera camera, RenderPreparation RenderPreparation) {
+        for (IconDisplay iconDisplay : RenderPreparation.icons) {
+            drawCenterOfMassIcon(buffer, pose, camera, iconDisplay.position());
+        }
+
+        for (PreparedForce vectorDisplay : RenderPreparation.vectors) {
+            if(!vectorDisplay.config().vectors()) continue;
             drawVector(
                 buffer,
                 pose,
                 camera,
-                vectorDisplay.force(),
-                vectorDisplay.color()
+                vectorDisplay
             );
         }
 
-        for (InformationDisplay informationDisplay : preparedData.information) {
+        for (InformationDisplay informationDisplay : RenderPreparation.information) {
             drawInfoDisplay(
                 buffer,
                 mc.font,
@@ -338,9 +419,7 @@ public class WorldDiagramDataRenderer {
             );
         }
 
-        for (IconDisplay iconDisplay : preparedData.icons) {
-            drawCenterOfMassIcon(buffer, pose, camera, iconDisplay.position);
-        }
+
     }
 
 
@@ -349,11 +428,11 @@ public class WorldDiagramDataRenderer {
         MultiBufferSource.BufferSource buffer,
         PoseStack poseStack,
         Camera camera,
-        ResolvedForce forceData,
-        int color
+        PreparedForce vectorDisplay
     ) {
-        Vec3 origin = forceData.origin();
-        Vec3 delta = forceData.delta();
+
+        Vec3 origin = vectorDisplay.origin();
+        Vec3 delta = vectorDisplay.delta();
 
         Vec3 cameraPosition = camera.getPosition();
         Vec3 cameraDirection = new Vec3(camera.getLookVector());
@@ -366,13 +445,31 @@ public class WorldDiagramDataRenderer {
             -cameraPosition.z
         );
 
+        Vec3 end = origin.add(getScaledDelta(delta));
+
+        if(DISPLAY_VECTOR_OUTLINE.get()){
+            VertexConsumer consumer =
+                buffer.getBuffer(RenderTypes.FORCE_OUT_LINES);
+            drawArrow(
+                poseStack,
+                consumer,
+                origin,
+                end,
+                cameraDirection,
+                0xFFFFFFFF
+            );
+
+            RenderUtils.drawPositionColorLine(
+                consumer,
+                poseStack,
+                origin,
+                end,
+                0xFFFFFFFF
+            );
+        }
 
         VertexConsumer consumer =
             buffer.getBuffer(RenderTypes.FORCE_LINES);
-
-
-
-        Vec3 end = origin.add(getScaledDelta(delta));
 
         drawArrow(
             poseStack,
@@ -380,7 +477,7 @@ public class WorldDiagramDataRenderer {
             origin,
             end,
             cameraDirection,
-            color
+            vectorDisplay.color()
         );
 
         RenderUtils.drawPositionColorLine(
@@ -388,8 +485,9 @@ public class WorldDiagramDataRenderer {
             poseStack,
             origin,
             end,
-            color
+            vectorDisplay.color()
         );
+
 
         poseStack.popPose();
     }
