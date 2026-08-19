@@ -443,13 +443,31 @@ public class WorldDiagramDataRenderer {
             -cameraPosition.z
         );
 
+        Vec3 end = origin.add(getScaledDelta(delta));
+
+        if(DISPLAY_VECTOR_OUTLINE.get()){
+            VertexConsumer consumer =
+                buffer.getBuffer(RenderTypes.FORCE_OUT_LINES);
+            drawArrow(
+                poseStack,
+                consumer,
+                origin,
+                end,
+                cameraDirection,
+                vectorDisplay.color()
+            );
+
+            RenderUtils.drawPositionColorLine(
+                consumer,
+                poseStack,
+                origin,
+                end,
+                0xFFFFFFFF
+            );
+        }
 
         VertexConsumer consumer =
             buffer.getBuffer(RenderTypes.FORCE_LINES);
-
-
-
-        Vec3 end = origin.add(getScaledDelta(delta));
 
         drawArrow(
             poseStack,
@@ -467,6 +485,7 @@ public class WorldDiagramDataRenderer {
             end,
             vectorDisplay.color()
         );
+
 
         poseStack.popPose();
     }
