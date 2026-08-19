@@ -394,6 +394,10 @@ public class WorldDiagramDataRenderer {
 
 
     private static void drawData(MultiBufferSource.BufferSource buffer, Minecraft mc, PoseStack pose, Camera camera, RenderPreparation RenderPreparation) {
+        for (IconDisplay iconDisplay : RenderPreparation.icons) {
+            drawCenterOfMassIcon(buffer, pose, camera, iconDisplay.position());
+        }
+
         for (PreparedForce vectorDisplay : RenderPreparation.vectors) {
             if(!vectorDisplay.config().vectors()) continue;
             drawVector(
@@ -415,9 +419,7 @@ public class WorldDiagramDataRenderer {
             );
         }
 
-        for (IconDisplay iconDisplay : RenderPreparation.icons) {
-            drawCenterOfMassIcon(buffer, pose, camera, iconDisplay.position());
-        }
+
     }
 
 
@@ -454,7 +456,7 @@ public class WorldDiagramDataRenderer {
                 origin,
                 end,
                 cameraDirection,
-                vectorDisplay.color()
+                0xFFFFFFFF
             );
 
             RenderUtils.drawPositionColorLine(
