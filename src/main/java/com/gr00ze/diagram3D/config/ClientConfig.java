@@ -65,7 +65,7 @@ public class ClientConfig
             .defineEnum("display_vectors", VectorMode.SEPARATED);
 
         DISPLAY_VECTOR_OUTLINE = BUILDER
-            .comment("")
+            .comment("Enable a white outline for all vectors")
             .define("display_vectors_outline", true);
 
         DISPLAY_VECTORS_INFO = BUILDER
