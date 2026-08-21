@@ -3,6 +3,7 @@ package com.gr00ze.diagram3D.gui;
 import dev.ryanhcode.sable.api.physics.force.ForceGroup;
 import dev.ryanhcode.sable.api.physics.force.ForceGroups;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractScrollWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -53,19 +54,19 @@ public class ForceGroupTable extends AbstractScrollWidget {
         float partialTick
     ) {
         int y = this.getY();
-
         renderHeader(guiGraphics, y);
-
-        y += rowHeight;
+        y += rowHeight;//To change if the header must be increased
+        guiGraphics.hLine(this.getX() + 5  ,this.getX() + width - 5, y, 0x99CCCCCC);
 
         for (ForceGroupRow row : rows) {
+
             if (y + rowHeight < this.getY()) {
                 y += rowHeight;
-                continue;
+                continue; //Don't draw hidden upper row
             }
 
             if (y > this.getY() + this.height) {
-                break;
+                break;//Don't draw hidden bottom rows
             }
 
             row.render(
@@ -76,7 +77,7 @@ public class ForceGroupTable extends AbstractScrollWidget {
                 mouseX,
                 mouseY
             );
-
+            guiGraphics.hLine(this.getX() + 5  ,this.getX() + width - 5, y, 0x99999999);
             y += rowHeight;
         }
     }
@@ -85,27 +86,29 @@ public class ForceGroupTable extends AbstractScrollWidget {
         GuiGraphics guiGraphics,
         int y
     ) {
+        Font font = Minecraft.getInstance().font;
+        int fontOffset = (int)(font.lineHeight * 0.5);
         guiGraphics.drawString(
-            Minecraft.getInstance().font,
-            "Force Group",
+            font,
+            Component.translatable("diagram3d.config_screen.force_table.header.force_group"),
             this.getX() + 8,
-            y + 7,
+            y + fontOffset,
             0xFFFFFFFF
         );
 
         guiGraphics.drawCenteredString(
-            Minecraft.getInstance().font,
-            "Vectors",
-            this.getX() + this.width - 100,
-            y + 7,
+            font,
+            Component.translatable("diagram3d.config_screen.force_table.header.vectors"),
+            this.getX() + getVectorRightOffset(this.width),
+            y + fontOffset,
             0xFFFFFFFF
         );
 
         guiGraphics.drawCenteredString(
-            Minecraft.getInstance().font,
-            "Info",
-            this.getX() + this.width - 45,
-            y + 7,
+            font,
+            Component.translatable("diagram3d.config_screen.force_table.header.force_info"),
+            this.getX() + getDetailsRightOffset(this.width),
+            y + fontOffset,
             0xFFFFFFFF
         );
 
@@ -141,9 +144,9 @@ public class ForceGroupTable extends AbstractScrollWidget {
             return false;
         }
 
-        double contentY = mouseY - this.getY() + this.scrollAmount() - 7;
+        double contentY = mouseY - this.getY() + this.scrollAmount();
 
-        int rowIndex = (int) (contentY / rowHeight) - 1; // -1 per header
+        int rowIndex = (int) (contentY / rowHeight) - 1; // -1 for header
 
         if (rowIndex < 0 || rowIndex >= rows.size()) {
             return false;
@@ -153,6 +156,7 @@ public class ForceGroupTable extends AbstractScrollWidget {
 
         if (row.mouseClicked(
             mouseX,
+            mouseY,
             this.getX(),
             this.getWidth(),
             button
@@ -161,5 +165,12 @@ public class ForceGroupTable extends AbstractScrollWidget {
         }
 
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    public static int getVectorRightOffset(int width){
+        return width - 100;
+    }
+    public static int getDetailsRightOffset(int width){
+        return width - 45;
     }
 }

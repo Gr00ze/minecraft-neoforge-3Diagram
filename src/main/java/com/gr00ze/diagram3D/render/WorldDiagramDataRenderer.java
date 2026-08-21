@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -46,6 +47,12 @@ import static com.gr00ze.diagram3D.render.RenderPreparation.PreparedDiagram;
 
 @EventBusSubscriber(modid = Diagram3D.MOD_ID, value = Dist.CLIENT)
 public class WorldDiagramDataRenderer {
+
+    public static final ResourceLocation INFO_BACKGROUND_TEXTURE =
+        ResourceLocation.fromNamespaceAndPath(
+            Diagram3D.MOD_ID,
+            "textures/info/background.png"
+        );
 
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event){
@@ -81,7 +88,7 @@ public class WorldDiagramDataRenderer {
         loadForceGroupConfig(renderPreparation);
 
 
-        VectorMode displayVectors = DISPLAY_VECTORS.get();
+        VectorMode displayVectors = VECTOR_MODE.get();
         switch (displayVectors) {
             case SEPARATED -> prepareSeparatedVectors(renderPreparation);
             case MERGED -> prepareMergedVectors(renderPreparation);
@@ -447,110 +454,38 @@ public class WorldDiagramDataRenderer {
 
         Vec3 end = origin.add(getScaledDelta(delta));
 
-        if(DISPLAY_VECTOR_OUTLINE.get()){
-            VertexConsumer consumer =
-                buffer.getBuffer(RenderTypes.FORCE_OUT_LINES);
-            drawArrow(
+        if (VECTOR_STYLE.get() == VectorStyle.SLIM) {
+            ArrowStyles.drawSlimArrow(
                 poseStack,
-                consumer,
+                buffer,
                 origin,
                 end,
                 cameraDirection,
-                0xFFFFFFFF
+                vectorDisplay.color()
             );
-
-            RenderUtils.drawPositionColorLine(
-                consumer,
+        }else{
+            ArrowStyles.drawTexturedArrow(
                 poseStack,
+                buffer,
                 origin,
                 end,
-                0xFFFFFFFF
+                cameraDirection,
+                vectorDisplay.color()
             );
         }
 
-        VertexConsumer consumer =
-            buffer.getBuffer(RenderTypes.FORCE_LINES);
 
-        drawArrow(
-            poseStack,
-            consumer,
-            origin,
-            end,
-            cameraDirection,
-            vectorDisplay.color()
-        );
 
-        RenderUtils.drawPositionColorLine(
-            consumer,
-            poseStack,
-            origin,
-            end,
-            vectorDisplay.color()
-        );
+
+
+
+
 
 
         poseStack.popPose();
     }
 
-    private static void drawArrow(
-        PoseStack poseStack,
-        VertexConsumer consumer,
-        Vec3 start,
-        Vec3 end,
-        Vec3 cameraLook,
-        int color
-    ){
 
-        Vec3 delta = end.subtract(start);
-        double distance = delta.length();
-
-        if (distance < 0.01)
-            return;
-
-
-        Vec3 direction =  delta.scale(1.0 / distance);
-        // lateral vector
-        Vec3 side = direction.cross(cameraLook).normalize();
-
-        double headSize = distance * 0.1;
-
-
-        if (side.lengthSqr() < 0.001)
-        {
-            side = direction.cross(new Vec3(0, 1, 0)).normalize();
-        }
-
-        Vec3 back = end.subtract(
-            direction.scale(headSize)
-        );
-
-
-        Vec3 tip1 = back.add(
-            side.scale(headSize)
-        );
-
-        Vec3 tip2 = back.subtract(
-            side.scale(headSize)
-        );
-
-
-        // origin V
-        RenderUtils.drawPositionColorLine(
-            consumer,
-            poseStack,
-            end,
-            tip1,
-            color
-        );
-
-        RenderUtils.drawPositionColorLine(
-            consumer,
-            poseStack,
-            end,
-            tip2,
-            color
-        );
-    }
 
     private static void drawInfoDisplay(
         MultiBufferSource.BufferSource buffer,
@@ -606,16 +541,35 @@ public class WorldDiagramDataRenderer {
     }
 
     private static void drawTextBackground(MultiBufferSource.BufferSource buffer, Matrix4f matrix, float width, float height){
-        VertexConsumer background = buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
+        VertexConsumer background;
+        if(INFO_BACKGROUND_USE_TEXTURE.get())
+        {
+            background = buffer.getBuffer(RenderTypes.texturedBackground(INFO_BACKGROUND_TEXTURE));
+            RenderUtils.drawTexturedCenteredQuad(
+                background,
+                matrix,
+                width,
+                height
+                );
+        }
 
-        RenderUtils.drawQuad(
-            background,
-            matrix,
-            QuadPoints.centeredXY(width, height),
-            0x993D3D3A,
-            LightTexture.FULL_BRIGHT
-        );
+        else{
+            background = buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
+            RenderUtils.drawUniformlyColoredCenteredQuad(
+                background,
+                matrix,
+                width,
+                height,
+                ConfigUtils.getColor(INFO_BACKGROUND_COLOR),
+                LightTexture.FULL_BRIGHT
+            );
+        }
+
+
+
     }
+
+
 
     /**
      * Method to identify if a player is looking a specific point with a threshold of tolerance
@@ -648,6 +602,7 @@ public class WorldDiagramDataRenderer {
 
         float size = 8F;
         final float halfSize = size * 0.5F;
+        final float quarterSize = size * 0.25F;
         final float outline = 1F;
 
         int dark = 0xFF4A2F18;
@@ -666,70 +621,60 @@ public class WorldDiagramDataRenderer {
         Matrix4f matrix = pose.last().pose();
 
         // outline/background
-        RenderUtils.drawQuad(
+        RenderUtils.drawUniformlyColoredCenteredQuad(
             background,
             matrix,
-            QuadPoints.centeredXY(
-                0F,
-                0F,
-                size + outline,
-                size + outline
-            ),
+            0F,
+            0F,
+            size + outline,
+            size + outline,
             white,
             LightTexture.FULL_BRIGHT
         );
         // top-left
-        RenderUtils.drawQuad(
+        RenderUtils.drawUniformlyColoredCenteredQuad(
             background,
             matrix,
-            QuadPoints.centeredXY(
-                -halfSize,
-                halfSize,
-                halfSize,
-                halfSize
-            ),
+            -quarterSize,
+            quarterSize,
+            halfSize,
+            halfSize,
             dark,
             LightTexture.FULL_BRIGHT
         );
 
         // top-right
-        RenderUtils.drawQuad(
+        RenderUtils.drawUniformlyColoredCenteredQuad(
             background,
             matrix,
-            QuadPoints.centeredXY(
-                halfSize,
-                halfSize,
-                halfSize,
-                halfSize
-            ),
+            quarterSize,
+            quarterSize,
+            halfSize,
+            halfSize,
             light,
             LightTexture.FULL_BRIGHT
         );
 
         // bottom-left
-        RenderUtils.drawQuad(
+        RenderUtils.drawUniformlyColoredCenteredQuad(
             background,
             matrix,
-            QuadPoints.centeredXY(
-                -halfSize,
-                -halfSize,
-                halfSize,
-                halfSize
-            ),
+            -quarterSize,
+            -quarterSize,
+            halfSize,
+            halfSize,
             light,
             LightTexture.FULL_BRIGHT
         );
 
         // bottom-right
-        RenderUtils.drawQuad(
+        RenderUtils.drawUniformlyColoredCenteredQuad(
             background,
             matrix,
-            QuadPoints.centeredXY(
-                halfSize,
-                -halfSize,
-                halfSize,
-                halfSize
-            ),
+            quarterSize,
+            -quarterSize,
+            halfSize,
+            halfSize,
             dark,
             LightTexture.FULL_BRIGHT
         );

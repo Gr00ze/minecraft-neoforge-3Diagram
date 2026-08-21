@@ -4,14 +4,18 @@ import com.gr00ze.diagram3D.Diagram3D;
 import com.gr00ze.diagram3D.config.ClientConfig;
 import com.gr00ze.diagram3D.config.ConfigUtils;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.widget.ScrollPanel;
 import org.jetbrains.annotations.NotNull;
+
+import static com.gr00ze.diagram3D.config.ClientConfig.GUI_BACKGROUND_COLOR;
 
 public class DisplayConfigScreen extends Screen {
 
@@ -30,8 +34,7 @@ public class DisplayConfigScreen extends Screen {
     private int panelWidth;
     private int panelHeight;
 
-    private Button centerOfMassButton;
-    private ForceGroupTable forceGroupTable;
+    private FixedPanel fixedPanel;
 
     public DisplayConfigScreen() {
         super(Component.literal("Visualization"));
@@ -39,6 +42,7 @@ public class DisplayConfigScreen extends Screen {
 
     @Override
     protected void init() {
+
         panelWidth = Math.max(
             MIN_PANEL_WIDTH,
             this.width * PANEL_WIDTH_PERCENT / 100
@@ -55,59 +59,98 @@ public class DisplayConfigScreen extends Screen {
         panelX = (this.width - panelWidth) / 2;
         panelY = (this.height - panelHeight) / 2;
 
-        int contentX = panelX + PANEL_PADDING;
-        int contentWidth = panelWidth - PANEL_PADDING * 2;
+        fixedPanel = new FixedPanel(panelX, panelY, panelWidth, panelHeight, PANEL_PADDING);
 
-        int centerOfMassY = panelY + PANEL_PADDING;
-
-        this.centerOfMassButton = Button.builder(
-            getCenterOfMassLabel(),
-            button -> cycleCenterOfMass()
-        ).bounds(
-            contentX + 90,
-            centerOfMassY,
-            85,
-            20
-        ).build();
-
-        this.addRenderableWidget(centerOfMassButton);
-
-        int tableY =
-            centerOfMassY
-                + CENTER_OF_MASS_HEIGHT
-                + TABLE_TOP_MARGIN;
-
-        int tableHeight =
-            panelY
-                + panelHeight
-                - PANEL_PADDING
-                - tableY;
-
-        this.forceGroupTable = new ForceGroupTable(
-            contentX,
-            tableY,
-            contentWidth,
-            tableHeight,
-            12
+        fixedPanel.addRow(
+            new StringWidget(
+                Component.translatable("diagram3d.configuration.display_center_of_mass"),
+                font
+            ),
+            Button.builder(
+                    getCenterOfMassModeLabel(),
+                    button -> cycleCenterOfMass()
+                )
+                .bounds(0, 0, 85, 20)
+                .build()
         );
 
-        this.addRenderableWidget(forceGroupTable);
+        fixedPanel.addRow(
+            new StringWidget(
+                Component.translatable("diagram3d.configuration.display_vector_mode"),
+                font
+            ),
+            Button.builder(
+                    getVectorModeLabel(),
+                    button -> cycleVectorMode()
+                )
+                .bounds(0, 0, 85, 20)
+                .build()
+        );
+
+        fixedPanel.addTable( new ForceGroupTable(
+            0,
+            0,
+            0,
+            0,
+            12
+        ));
+
+        this.addRenderableWidget(fixedPanel);
 
         Button moreSettings = Button.builder(
-            Component.translatable("diagram3d.config_screen.more_settings"),
+            Component.literal("⚙"),
             this::onPressMoreSettings
         ).bounds(
-            this.width - 55,
-            0,
-            55,
+            this.width - 24,
+            2,
+            20,
             20
         ).build();
+
+        moreSettings.setTooltip(
+            Tooltip.create(
+                Component.translatable(
+                    "diagram3d.config_screen.more_settings"
+                )
+            )
+        );
 
         this.addRenderableWidget(moreSettings);
     }
+    private int currentY;
 
-    private Component getCenterOfMassLabel() {
+    private <W extends AbstractWidget> W addRenderableWidgetBelow(W widget, int height, int margin){
+        widget.setY(currentY);
+        this.addRenderableWidget(widget);
+        currentY += height + margin;
+        return widget;
+
+    }
+
+
+
+    private Component getCenterOfMassModeLabel() {
         return ClientConfig.DISPLAY_CENTER_OF_MASS.get().getTranslatedName();
+    }
+    private Component getVectorModeLabel() {
+        return ClientConfig.VECTOR_MODE.get().getTranslatedName();
+    }
+
+    private void cycleVectorMode() {
+        ClientConfig.VectorMode current =
+            ConfigUtils.getVectorsMode();
+
+        ClientConfig.VectorMode next =
+            switch (current) {
+                case DISABLED -> ClientConfig.VectorMode.SEPARATED;
+                case SEPARATED -> ClientConfig.VectorMode.MERGED;
+                case MERGED ->  ClientConfig.VectorMode.DISABLED;
+            };
+
+        ConfigUtils.setVectorsMode(next);
+
+        this.clearWidgets();
+        this.init();
     }
 
     private void cycleCenterOfMass() {
@@ -152,37 +195,11 @@ public class DisplayConfigScreen extends Screen {
 
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
-        guiGraphics.fill(
-            panelX,
-            panelY,
-            panelX + panelWidth,
-            panelY + panelHeight,
-            0xA0101010
-        );
+
 
         for(Renderable renderable : this.renderables) {
             renderable.render(guiGraphics, mouseX, mouseY, partialTick);
         }
-
-
-
-
-        guiGraphics.drawString(
-            this.font,
-            "Center of Mass",
-            panelX + PANEL_PADDING,
-            panelY + PANEL_PADDING + 6,
-            0xFFFFFFFF
-        );
-
-
-
-
-
-
-
-
-
     }
 
     @Override
