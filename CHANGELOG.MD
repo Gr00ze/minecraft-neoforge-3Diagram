@@ -1,5 +1,30 @@
 # Changelog
 
+## V0.4.0 — Display on look - Merged Forces, Outline, Vector scaling configuration
+
+-Added configuration to set merged forces diagrams like.
+-Added an outline to make vectors more visible
+-Added a configuration to make outline optional
+-Added configuration to scale proportionally and quadratically the vector dimension
+-Added a button shortcut to open configs
+-Now more options are translatable
+-Changed configuration to scale maximum limits
+-Added a detailed description of the scaling function
+-Added details on look option for center of mass
+-Added details on look option for all force group information.
+-Added auto positioning for force group details when set to on look
+
+## V0.3.2 — Merged Forces, Outline, Vector scaling configuration
+
+-Added configuration to set merged forces diagrams like.
+-Added an outline to make vectors more visible
+-Added a configuration to make outline optional
+-Added configuration to scale proportionally and quadratically the vector dimension
+-Added a button shortcut to open configs
+-Now more options are translatable
+-Changed configuration to scale maximum limits
+-Added a detailed description of the scaling function
+
 ## V0.3.1 — Display on look
 
 -Added details on look option for center of mass

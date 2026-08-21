@@ -16,8 +16,8 @@
   "diagram3d.configuration.display_center_of_mass.tooltip": "The display center of the mass mode",
   "diagram3d.configuration.force_group_configs.tooltip": "Configure the display of individual force groups.\nPress the 'toggle key' inside a world to configure it",
   "diagram3d.configuration.display_vectors_outline.tooltip": "Enable a white outline of forces",
-  "diagram3d.configuration.proportional_vector_scaling_factor.tooltip": "Coefficient to scale or reduce vectors linearly",
-  "diagram3d.configuration.quadratic_vector_scaling_factor.tooltip": "Coefficient to scale or reduce vectors quadratically",
+  "diagram3d.configuration.proportional_vector_scaling_factor.tooltip": "Coefficient to scale or reduce vectors linearly. Considering \nx the original size\nP the proportional factor\nQ the quadratic factor\nThe function is:\n Q * x^2 + P * x",
+  "diagram3d.configuration.quadratic_vector_scaling_factor.tooltip": "Coefficient to scale or reduce vectors quadratically. Considering \nx the original size\nP the proportional factor\nQ the quadratic factor\nThe function is:\n Q * x^2 + P * x",
 
   "diagram3d.configuration.Rendering": "Rendering Section",
   "diagram3d.configuration.Rendering.tooltip": "This section manage global rendering options",
