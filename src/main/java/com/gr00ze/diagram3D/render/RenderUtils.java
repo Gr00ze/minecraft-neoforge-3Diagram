@@ -135,6 +135,42 @@ public class RenderUtils {
                 .setUv(vertices[i + 2], vertices[i + 3]);
         }
     }
+    //It stretches the texture if repeatTexture is false
+    public static void drawTexturedRect(
+        VertexConsumer buffer,
+        Matrix4f pose,
+        float startX,
+        float startY,
+        float width,
+        float height,
+        boolean repeatTexture
+    ) {
+
+        float uMax = 1, vMax = 1;
+
+        if (repeatTexture) {
+            uMax = width / 16;
+            vMax = height / 16;
+        }
+
+        int numberRowInformation = 4;
+        int numberOfVertex = 4;
+
+
+
+        float[] vertices = new float[]{
+            startX        ,  startY, 0, 0,
+            startX        ,  startY + height, 0, vMax,
+            startX + width,  startY + height, uMax, vMax,
+            startX + width,  startY, uMax, 0,
+        };
+
+        for (int i = 0; i < numberOfVertex * numberRowInformation; i+= numberRowInformation) {
+            buffer
+                .addVertex(pose, vertices[i],  vertices[i + 1], 0)
+                .setUv(vertices[i + 2], vertices[i + 3]);
+        }
+    }
 
 //    public static void drawTexturedQuad(VertexConsumer consumer, Matrix4f matrix, TexturedQuadPoints quad){
 //
