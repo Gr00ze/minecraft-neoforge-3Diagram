@@ -1,9 +1,9 @@
-package com.gr00ze.diagram3D.render;
+package com.gr00ze.diagram3D.render.quad;
 
 import org.joml.Vector3f;
 
 
-public class QuadPoints {
+class QuadPoints {
     private static final int POINT_COUNT = 4;
     private final Vector3f[] points = new Vector3f[POINT_COUNT];
     private int count = 0;
