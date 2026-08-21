@@ -6,6 +6,7 @@ import com.gr00ze.diagram3D.config.ForceGroupDisplayConfig;
 import dev.ryanhcode.sable.api.physics.force.ForceGroup;
 import dev.ryanhcode.sable.api.physics.force.ForceGroups;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 
@@ -17,10 +18,12 @@ public class ForceGroupRow {
 
     private final ForceGroup forceGroup;
     private final int rowHeight;
+    private final int rowPadding;
 
     public ForceGroupRow(ForceGroup forceGroup, int rowHeight) {
         this.forceGroup = forceGroup;
         this.rowHeight = rowHeight;
+        this.rowPadding = 1;
     }
 
     public void render(
@@ -39,18 +42,19 @@ public class ForceGroupRow {
         ForceGroupDisplayConfig config =
             ClientConfig.getForceGroupConfig(id);
 
+        int fontYOffset = (int)(minecraft.font.lineHeight * 0.5);
         guiGraphics.drawString(
             minecraft.font,
             forceGroup.name(),
             x + 8,
-            y + 7,
+            y + fontYOffset,
             forceGroup.color()
         );
 
-        guiGraphics.hLine(x + 10  ,x + width - 10, y + rowHeight * 3 / 2, 0x99999999);
 
-        int vectorsX = x + width - 100;
-        int infoX = x + width - 45;
+
+        int vectorsX = x + ForceGroupTable.getVectorRightOffset(width);
+        int infoX = x + ForceGroupTable.getDetailsRightOffset(width);
 
         renderToggle(
             guiGraphics,
@@ -95,17 +99,28 @@ public class ForceGroupRow {
                 : INACTIVE_COLOR;
         }
 
+        guiGraphics.fill(
+            centerX - getXPadding(),
+            y,
+            centerX + getXPadding(),
+            y + rowHeight,
+            hovered ? 0x55AAAAAA : 0x55555555
+        );
+
+        Font font = Minecraft.getInstance().font;
+        int fontYOffset = (int)(font.lineHeight * 0.5);
         guiGraphics.drawCenteredString(
             Minecraft.getInstance().font,
             text,
             centerX,
-            y + 7,
+            y + fontYOffset,
             color
         );
     }
 
     public boolean mouseClicked(
         double mouseX,
+        double mouseY,
         int x,
         int width,
         int button
@@ -114,12 +129,12 @@ public class ForceGroupRow {
             return false;
         }
 
-        int vectorsX = x + width - 100;
-        int infoX = x + width - 45;
+        int vectorsX = x + ForceGroupTable.getVectorRightOffset(width);
+        int infoX = x + ForceGroupTable.getDetailsRightOffset(width);
 
         if (
-            mouseX >= vectorsX - 12
-            && mouseX <= vectorsX + 12
+            mouseX >= vectorsX - getXPadding()
+            && mouseX <= vectorsX + getXPadding()
 
         ) {
             ConfigUtils.toggleVectors(getId());
@@ -127,8 +142,8 @@ public class ForceGroupRow {
         }
 
         if (
-            mouseX >= infoX - 12
-            && mouseX <= infoX + 12
+            mouseX >= infoX - getXPadding()
+            && mouseX <= infoX + getXPadding()
 
         ) {
             ConfigUtils.toggleInfo(getId());
@@ -144,10 +159,15 @@ public class ForceGroupRow {
         int centerX,
         int y
     ) {
-        return mouseX >= centerX - 12
-            && mouseX <= centerX + 12
-            && mouseY >= y + 7
-            && mouseY <= y + rowHeight + 5;
+        return mouseX >= centerX - getXPadding()
+            && mouseX <= centerX + getXPadding()
+            && mouseY >= y + this.rowPadding
+            && mouseY <= y + rowHeight - this.rowPadding;
+    }
+
+
+    private int getXPadding() {
+        return 8;
     }
 
     private ResourceLocation getId() {
