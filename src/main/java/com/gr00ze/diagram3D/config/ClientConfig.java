@@ -58,7 +58,17 @@ public class ClientConfig
                 "diagram3d.configuration.display_vector_mode." + name().toLowerCase(Locale.ROOT)
             );
         }
+    }
+    public enum VectorStyle implements TranslatableEnum {
+        SLIM,
+        TEXTURED;
 
+        @Override
+        public @NotNull Component getTranslatedName() {
+            return Component.translatable(
+                "diagram3d.configuration.vector_style." + name().toLowerCase(Locale.ROOT)
+            );
+        }
     }
 
 
@@ -80,6 +90,7 @@ public class ClientConfig
     public static final ModConfigSpec.DoubleValue QUADRATIC_VECTOR_SCALING_FACTOR;
     public static final ModConfigSpec.ConfigValue<String> INFO_BACKGROUND_COLOR;
     public static final ModConfigSpec.ConfigValue<String> GUI_BACKGROUND_COLOR;
+    public static final ModConfigSpec.EnumValue<VectorStyle> VECTOR_STYLE;
     public static final ModConfigSpec.BooleanValue INFO_BACKGROUND_USE_TEXTURE;
     public static final ModConfigSpec.BooleanValue GUI_BACKGROUND_USE_TEXTURE;
 
@@ -139,6 +150,10 @@ public class ClientConfig
             "0xA0101010",
             ConfigUtils::isValidColor
         );
+
+        VECTOR_STYLE = BUILDER
+            .comment("Option to select in which way to render the vector")
+            .defineEnum("vector_style", VectorStyle.SLIM);
 
         INFO_BACKGROUND_USE_TEXTURE = BUILDER.define(
             "info_background_use_texture",

@@ -111,5 +111,31 @@ public class RenderTypes {
         );
     }
 
+    public static RenderType texturedArrow(ResourceLocation texture) {
+        return RenderType.create(
+            "diagram3d_textured_force_arrow",
+            DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+            VertexFormat.Mode.TRIANGLES,
+            256,
+            false,
+            false,
+            RenderType.CompositeState.builder()
+                .setShaderState(RenderStateShard.POSITION_COLOR_TEX_LIGHTMAP_SHADER)
+                .setTextureState(
+                    new RenderStateShard.TextureStateShard(
+                        texture,
+                        false,
+                        false
+                    )
+                )
+                .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                .setLightmapState(RenderStateShard.NO_LIGHTMAP)
+                .setCullState(RenderStateShard.NO_CULL)
+                .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
+                .createCompositeState(false)
+        );
+    }
+
+
     public static void init(){}
 }

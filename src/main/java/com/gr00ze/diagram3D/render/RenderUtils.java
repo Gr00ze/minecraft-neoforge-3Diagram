@@ -200,4 +200,39 @@ public class RenderUtils {
 
         return original.normalize().scale(targetLength);
     }
+
+    public static void drawTexturedTriangle(
+        VertexConsumer consumer,
+        PoseStack poseStack,
+        Vec3 a,
+        Vec3 b,
+        Vec3 c,
+        int color
+    ) {
+        Matrix4f matrix = poseStack.last().pose();
+
+        consumer.addVertex(matrix,
+                (float) a.x,
+                (float) a.y,
+                (float) a.z)
+            .setColor(color)
+            .setUv(0.5f, 0.0f)
+            .setUv2(0, 0);
+
+        consumer.addVertex(matrix,
+                (float) b.x,
+                (float) b.y,
+                (float) b.z)
+            .setColor(color)
+            .setUv(0.0f, 1.0f)
+            .setUv2(0, 0);
+
+        consumer.addVertex(matrix,
+                (float) c.x,
+                (float) c.y,
+                (float) c.z)
+            .setColor(color)
+            .setUv(1.0f, 1.0f)
+            .setUv2(0, 0);
+    }
 }

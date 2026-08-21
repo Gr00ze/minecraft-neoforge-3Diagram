@@ -454,110 +454,38 @@ public class WorldDiagramDataRenderer {
 
         Vec3 end = origin.add(getScaledDelta(delta));
 
-        if(DISPLAY_VECTOR_OUTLINE.get()){
-            VertexConsumer consumer =
-                buffer.getBuffer(RenderTypes.FORCE_OUT_LINES);
-            drawArrow(
+        if (VECTOR_STYLE.get() == VectorStyle.SLIM) {
+            ArrowStyles.drawSlimArrow(
                 poseStack,
-                consumer,
+                buffer,
                 origin,
                 end,
                 cameraDirection,
-                0xFFFFFFFF
+                vectorDisplay.color()
             );
-
-            RenderUtils.drawPositionColorLine(
-                consumer,
+        }else{
+            ArrowStyles.drawTexturedArrow(
                 poseStack,
+                buffer,
                 origin,
                 end,
-                0xFFFFFFFF
+                cameraDirection,
+                vectorDisplay.color()
             );
         }
 
-        VertexConsumer consumer =
-            buffer.getBuffer(RenderTypes.FORCE_LINES);
 
-        drawArrow(
-            poseStack,
-            consumer,
-            origin,
-            end,
-            cameraDirection,
-            vectorDisplay.color()
-        );
 
-        RenderUtils.drawPositionColorLine(
-            consumer,
-            poseStack,
-            origin,
-            end,
-            vectorDisplay.color()
-        );
+
+
+
+
 
 
         poseStack.popPose();
     }
 
-    private static void drawArrow(
-        PoseStack poseStack,
-        VertexConsumer consumer,
-        Vec3 start,
-        Vec3 end,
-        Vec3 cameraLook,
-        int color
-    ){
 
-        Vec3 delta = end.subtract(start);
-        double distance = delta.length();
-
-        if (distance < 0.01)
-            return;
-
-
-        Vec3 direction =  delta.scale(1.0 / distance);
-        // lateral vector
-        Vec3 side = direction.cross(cameraLook).normalize();
-
-        double headSize = distance * 0.1;
-
-
-        if (side.lengthSqr() < 0.001)
-        {
-            side = direction.cross(new Vec3(0, 1, 0)).normalize();
-        }
-
-        Vec3 back = end.subtract(
-            direction.scale(headSize)
-        );
-
-
-        Vec3 tip1 = back.add(
-            side.scale(headSize)
-        );
-
-        Vec3 tip2 = back.subtract(
-            side.scale(headSize)
-        );
-
-
-        // origin V
-        RenderUtils.drawPositionColorLine(
-            consumer,
-            poseStack,
-            end,
-            tip1,
-            color
-        );
-
-        RenderUtils.drawPositionColorLine(
-            consumer,
-            poseStack,
-            end,
-            tip2,
-            color
-        );
-    }
 
     private static void drawInfoDisplay(
         MultiBufferSource.BufferSource buffer,
