@@ -103,7 +103,7 @@ public class ClientConfig
             .comment("The scan radius for which the player will ask information for sublevels to the server ")
             .defineInRange("radius", 20F, 0, 128);
 
-        BUILDER.push("Vectors");
+        BUILDER.push("vectors");
 
         VECTOR_MODE = BUILDER
             .comment("Enable the vector rendering")
@@ -135,7 +135,7 @@ public class ClientConfig
 
         BUILDER.pop();
 
-        BUILDER.push("Info display");
+        BUILDER.push("info_display");
 
             DISPLAY_VECTORS_INFO = BUILDER
                 .comment("Display vector info rendering mode")
