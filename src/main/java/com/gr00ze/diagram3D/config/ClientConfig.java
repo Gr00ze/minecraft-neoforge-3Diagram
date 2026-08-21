@@ -104,8 +104,8 @@ public class ClientConfig
 
         BUILDER.pop();
 
-        PROPORTIONAL_VECTOR_SCALING_FACTOR = BUILDER.defineInRange("proportional_vector_scaling_factor", 0.01F, 0F, 1F);
-        QUADRATIC_VECTOR_SCALING_FACTOR = BUILDER.defineInRange("quadratic_vector_scaling_factor", 0.00001F, 0F, 1F);
+        PROPORTIONAL_VECTOR_SCALING_FACTOR = BUILDER.defineInRange("proportional_vector_scaling_factor", 0.01F, 0F, 2F);
+        QUADRATIC_VECTOR_SCALING_FACTOR = BUILDER.defineInRange("quadratic_vector_scaling_factor", 0.00001F, 0F, 2F);
     }
 
 
