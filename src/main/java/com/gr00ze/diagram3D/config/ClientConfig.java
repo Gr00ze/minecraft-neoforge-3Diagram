@@ -3,11 +3,14 @@ package com.gr00ze.diagram3D.config;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.InMemoryFormat;
 import com.gr00ze.diagram3D.Diagram3D;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.TranslatableEnum;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,11 +22,18 @@ public class ClientConfig
     public static final int UPDATE_REQUEST_TICK_INTERVAL = 1;
     public static final long TIMEOUT_RENDER_TICKS = 20;
 
-    public enum CenterOfMassMode {
+    public enum CenterOfMassMode implements TranslatableEnum {
         DISABLED,
         ICON,
         DETAILS,
-        ICON_DETAILS_ONLOOK
+        ICON_DETAILS_ONLOOK;
+
+        @Override
+        public @NotNull Component getTranslatedName() {
+            return Component.translatable(
+                "diagram3d.configuration.display_center_of_mass." + name().toLowerCase(Locale.ROOT)
+            );
+        }
     }
     public enum VectorInfoMode {
         DISABLED,
@@ -94,8 +104,8 @@ public class ClientConfig
 
         BUILDER.pop();
 
-        PROPORTIONAL_VECTOR_SCALING_FACTOR = BUILDER.defineInRange("proportional_vector_scaling_factor", 0.05F, 0F, 1F);
-        QUADRATIC_VECTOR_SCALING_FACTOR = BUILDER.defineInRange("quadratic_vector_scaling_factor", 0.1F, 0F, 1F);
+        PROPORTIONAL_VECTOR_SCALING_FACTOR = BUILDER.defineInRange("proportional_vector_scaling_factor", 0.01F, 0F, 1F);
+        QUADRATIC_VECTOR_SCALING_FACTOR = BUILDER.defineInRange("quadratic_vector_scaling_factor", 0.00001F, 0F, 1F);
     }
 
 

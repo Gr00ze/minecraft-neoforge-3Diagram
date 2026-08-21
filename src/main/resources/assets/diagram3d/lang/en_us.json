@@ -30,5 +30,12 @@
   "diagram3d.configuration.title": "Diagram 3D Configuration",
 
   "diagram3d.configuration.section.diagram3d.client.toml.title": "Client Configuration",
-  "diagram3d.configuration.section.diagram3d.client.toml": "Diagram 3D Client Settings"
+  "diagram3d.configuration.section.diagram3d.client.toml": "Diagram 3D Client Settings",
+
+  "diagram3d.config_screen.more_settings": "More...",
+
+  "diagram3d.configuration.display_center_of_mass.disabled": "Disabled",
+  "diagram3d.configuration.display_center_of_mass.icon": "Icon",
+  "diagram3d.configuration.display_center_of_mass.details": "Details",
+  "diagram3d.configuration.display_center_of_mass.icon_details_onlook": "Dynamic details"
 }

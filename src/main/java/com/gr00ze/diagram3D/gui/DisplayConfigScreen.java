@@ -1,5 +1,6 @@
 package com.gr00ze.diagram3D.gui;
 
+import com.gr00ze.diagram3D.Diagram3D;
 import com.gr00ze.diagram3D.config.ClientConfig;
 import com.gr00ze.diagram3D.config.ConfigUtils;
 import net.minecraft.client.gui.GuiGraphics;
@@ -7,6 +8,9 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import org.jetbrains.annotations.NotNull;
 
 public class DisplayConfigScreen extends Screen {
@@ -88,21 +92,22 @@ public class DisplayConfigScreen extends Screen {
         );
 
         this.addRenderableWidget(forceGroupTable);
+
+        Button moreSettings = Button.builder(
+            Component.translatable("diagram3d.config_screen.more_settings"),
+            this::onPressMoreSettings
+        ).bounds(
+            this.width - 55,
+            0,
+            55,
+            20
+        ).build();
+
+        this.addRenderableWidget(moreSettings);
     }
 
     private Component getCenterOfMassLabel() {
-        return switch (ConfigUtils.getCenterOfMassMode()) {
-            case DISABLED ->
-                Component.literal("Disabled");
-
-            case ICON ->
-                Component.literal("Icon");
-
-            case DETAILS ->
-                Component.literal("Details");
-            case ICON_DETAILS_ONLOOK ->
-                Component.literal("Dynamic Details");
-        };
+        return ClientConfig.DISPLAY_CENTER_OF_MASS.get().getTranslatedName();
     }
 
     private void cycleCenterOfMass() {
@@ -121,6 +126,20 @@ public class DisplayConfigScreen extends Screen {
 
         this.clearWidgets();
         this.init();
+    }
+
+    private void onPressMoreSettings(Button button) {
+        if (this.minecraft == null) {
+            return;
+        }
+
+        ModContainer modContainer = ModList.get()
+            .getModContainerById(Diagram3D.MOD_ID)
+            .orElseThrow();
+
+        this.minecraft.setScreen(
+            new ConfigurationScreen(modContainer, this)
+        );
     }
 
     @Override
