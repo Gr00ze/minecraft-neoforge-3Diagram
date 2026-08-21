@@ -22,7 +22,13 @@ public class ConfigUtils {
     }
 
 
+    public static ClientConfig.VectorMode getVectorsMode() {
+        return VECTOR_MODE.get();
+    }
 
+    public static void setVectorsMode(ClientConfig.VectorMode mode) {
+        VECTOR_MODE.set(mode);
+    }
 
     public static ClientConfig.CenterOfMassMode getCenterOfMassMode() {
         return DISPLAY_CENTER_OF_MASS.get();
@@ -134,5 +140,22 @@ public class ConfigUtils {
                 new ForceGroupDisplayConfig(vectors, info)
             );
         }
+    }
+
+    public static boolean isValidColor(Object value) {
+        if (!(value instanceof String s)) {
+            return false;
+        }
+
+        try {
+            long color = Long.decode(s);
+            return color >= 0 && color <= 0xFFFFFFFFL;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public static int getColor(ModConfigSpec.ConfigValue<String> color){
+        return (int) Long.decode(color.get()).longValue();
     }
 }
