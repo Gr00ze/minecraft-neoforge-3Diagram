@@ -48,7 +48,15 @@
   "diagram3d.configuration.display_vectors_info.on_look": "Dynamic details",
 
   "diagram3d.configuration.gui_background_color": "Gui background color",
+  "diagram3d.configuration.gui_background_use_texture": "GUI Textured background",
+
   "diagram3d.configuration.info_background_color": "Display background color",
+  "diagram3d.configuration.info_background_use_texture": "Info Textured background",
+
+  "diagram3d.configuration.vector_style": "Vector style",
+  "diagram3d.configuration.vector_style.slim": "Slim",
+  "diagram3d.configuration.vector_style.textured": "Textured",
+
   "diagram3d.config_screen.force_table.header.force_info": "Details",
   "diagram3d.config_screen.force_table.header.vectors": "Vectors",
   "diagram3d.config_screen.force_table.header.force_group": "Force Group"
