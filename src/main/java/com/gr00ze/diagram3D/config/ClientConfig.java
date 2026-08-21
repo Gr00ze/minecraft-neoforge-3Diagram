@@ -103,7 +103,7 @@ public class ClientConfig
             .comment("The scan radius for which the player will ask information for sublevels to the server ")
             .defineInRange("radius", 20F, 0, 128);
 
-        BUILDER.push("Rendering");
+        BUILDER.push("Vectors");
 
         VECTOR_MODE = BUILDER
             .comment("Enable the vector rendering")
@@ -112,19 +112,6 @@ public class ClientConfig
         DISPLAY_VECTOR_OUTLINE = BUILDER
             .comment("Enable a white outline for all vectors")
             .define("display_vectors_outline", true);
-
-        DISPLAY_VECTORS_INFO = BUILDER
-            .comment("Display vector info rendering mode")
-            .defineEnum("display_vectors_info", VectorInfoMode.ON_LOOK);
-
-        DISPLAY_CENTER_OF_MASS = BUILDER
-            .comment("Display center of the mass mode")
-            .defineEnum(
-                "display_center_of_mass",
-                CenterOfMassMode.ICON_DETAILS_ONLOOK
-            );
-        BUILDER.pop();
-
 
         PROPORTIONAL_VECTOR_SCALING_FACTOR = BUILDER.defineInRange(
             "proportional_vector_scaling_factor",
@@ -139,25 +126,43 @@ public class ClientConfig
             2
         );
 
-        INFO_BACKGROUND_COLOR = BUILDER.define(
-            "info_background_color",
-            "0x993D3D3A",
-            ConfigUtils::isValidColor
-        );
-
-        GUI_BACKGROUND_COLOR = BUILDER.define(
-            "gui_background_color",
-            "0xA0101010",
-            ConfigUtils::isValidColor
-        );
 
         VECTOR_STYLE = BUILDER
             .comment("Option to select in which way to render the vector")
             .defineEnum("vector_style", VectorStyle.SLIM);
 
-        INFO_BACKGROUND_USE_TEXTURE = BUILDER.define(
-            "info_background_use_texture",
-            false
+
+
+        BUILDER.pop();
+
+        BUILDER.push("Info display");
+
+            DISPLAY_VECTORS_INFO = BUILDER
+                .comment("Display vector info rendering mode")
+                .defineEnum("display_vectors_info", VectorInfoMode.ON_LOOK);
+
+            DISPLAY_CENTER_OF_MASS = BUILDER
+                .comment("Display center of the mass mode")
+                .defineEnum(
+                    "display_center_of_mass",
+                    CenterOfMassMode.ICON_DETAILS_ONLOOK
+                );
+            INFO_BACKGROUND_COLOR = BUILDER.define(
+                "info_background_color",
+                "0x993D3D3A",
+                ConfigUtils::isValidColor
+            );
+
+            INFO_BACKGROUND_USE_TEXTURE = BUILDER.define(
+                "info_background_use_texture",
+                false
+            );
+        BUILDER.pop();
+
+        GUI_BACKGROUND_COLOR = BUILDER.define(
+            "gui_background_color",
+            "0xA0101010",
+            ConfigUtils::isValidColor
         );
 
         GUI_BACKGROUND_USE_TEXTURE = BUILDER.define(
