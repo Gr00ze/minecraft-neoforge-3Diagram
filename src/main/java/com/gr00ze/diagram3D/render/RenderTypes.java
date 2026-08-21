@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.OptionalDouble;
 
@@ -56,6 +57,32 @@ public class RenderTypes {
             .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
             .createCompositeState(false)
     );
+
+
+    public static RenderType texturedBackground(ResourceLocation texture) {
+        return RenderType.create(
+            "diagram3d_textured_background",
+            DefaultVertexFormat.POSITION_TEX,
+            VertexFormat.Mode.QUADS,
+            256,
+            false,
+            false,
+            RenderType.CompositeState.builder()
+                .setShaderState(RenderStateShard.POSITION_TEX_SHADER)
+                .setTextureState(
+                    new RenderStateShard.TextureStateShard(
+                        texture,
+                        false,
+                        false
+                    )
+                )
+                .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                .setLightmapState(RenderStateShard.LIGHTMAP)
+                .setCullState(RenderStateShard.NO_CULL)
+                .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
+                .createCompositeState(false)
+        );
+    }
 
     public static RenderType TEST_RENDER_TYPE = null;
 
