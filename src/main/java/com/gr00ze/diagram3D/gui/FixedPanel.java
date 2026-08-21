@@ -1,5 +1,11 @@
 package com.gr00ze.diagram3D.gui;
 
+import com.gr00ze.diagram3D.Diagram3D;
+import com.gr00ze.diagram3D.config.ClientConfig;
+import com.gr00ze.diagram3D.config.ConfigUtils;
+import com.gr00ze.diagram3D.render.RenderTypes;
+import com.gr00ze.diagram3D.render.RenderUtils;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;
@@ -7,13 +13,24 @@ import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.gr00ze.diagram3D.config.ClientConfig.GUI_BACKGROUND_COLOR;
+import static com.gr00ze.diagram3D.config.ClientConfig.GUI_BACKGROUND_USE_TEXTURE;
+
 public class FixedPanel extends AbstractContainerEventHandler
     implements Renderable, NarratableEntry {
+
+    public static final ResourceLocation BACKGROUND_TEXTURE =
+        ResourceLocation.fromNamespaceAndPath(
+            Diagram3D.MOD_ID,
+            "textures/gui/background.png"
+        );
 
     private final List<GuiEventListener> children = new ArrayList<>();
 
@@ -59,6 +76,34 @@ public class FixedPanel extends AbstractContainerEventHandler
         int mouseY,
         float partialTick
     ) {
+
+
+
+
+        if(GUI_BACKGROUND_USE_TEXTURE.get()){
+            VertexConsumer buffer = guiGraphics.bufferSource().getBuffer(
+                RenderTypes.texturedBackground(BACKGROUND_TEXTURE)
+            );
+            RenderUtils.drawTexturedRect(
+                buffer,
+                guiGraphics.pose().last().pose(),
+                x,
+                y,
+                width,
+                height,
+                true
+            );
+        }else{
+            guiGraphics.fill(
+                this.x,
+                this.y,
+                this.x + this.width,
+                this.y + this.height,
+                ConfigUtils.getColor(GUI_BACKGROUND_COLOR)
+            );
+        }
+
+
         for (GuiEventListener child : children) {
             if (child instanceof Renderable renderable) {
                 renderable.render(guiGraphics, mouseX, mouseY, partialTick);

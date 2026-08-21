@@ -195,13 +195,7 @@ public class DisplayConfigScreen extends Screen {
 
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
-        guiGraphics.fill(
-            panelX,
-            panelY,
-            panelX + panelWidth,
-            panelY + panelHeight,
-            ConfigUtils.getColor(GUI_BACKGROUND_COLOR)
-        );
+
 
         for(Renderable renderable : this.renderables) {
             renderable.render(guiGraphics, mouseX, mouseY, partialTick);
