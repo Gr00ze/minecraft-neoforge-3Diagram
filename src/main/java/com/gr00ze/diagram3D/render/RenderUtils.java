@@ -44,15 +44,112 @@ public class RenderUtils {
             .setNormal(poseStack.last(), dir.x, dir.y, dir.z);
     }
 
-    public static void drawQuad(VertexConsumer consumer, Matrix4f matrix, QuadPoints quad, int argb,int packedLight){
+//    public static void drawUniformlyColoredQuad(VertexConsumer consumer, Matrix4f matrix, QuadPoints quad, int argb,int packedLight){
+//
+//        for (Vector3f point : quad.getPoints())
+//        {
+//            consumer.addVertex(matrix, point.x,  point.y, point.z)
+//                .setColor(argb)
+//                .setLight(packedLight);
+//        }
+//    }
 
-        for (Vector3f point : quad.getPoints())
-        {
-            consumer.addVertex(matrix, point.x,  point.y, point.z)
-                .setColor(argb)
-                .setLight(packedLight);
+    public static void drawUniformlyColoredCenteredQuad(
+        VertexConsumer buffer,
+        Matrix4f pose,
+        float centerX,
+        float centerY,
+        float width,
+        float height,
+        int color,
+        int light
+    ) {
+        float halfWidth = width / 2.0F;
+        float halfHeight = height / 2.0F;
+
+        int numberRowInformation = 2;
+        int numberOfVertex = 4;
+
+        float[] vertices = new float[]{
+          centerX - halfWidth, centerY + halfHeight,
+          centerX + halfWidth, centerY + halfHeight,
+          centerX + halfWidth, centerY - halfHeight,
+          centerX - halfWidth, centerY - halfHeight,
+        };
+
+        for (int i = 0; i < numberOfVertex * numberRowInformation; i+=numberRowInformation) {
+            buffer.addVertex(pose, vertices[i],  vertices[i + 1], 0)
+                .setColor(color);
         }
     }
+
+    public static void drawUniformlyColoredCenteredQuad(
+        VertexConsumer buffer,
+        Matrix4f pose,
+        float width,
+        float height,
+        int color,
+        int light
+    ) {
+        float halfWidth = width / 2.0F;
+        float halfHeight = height / 2.0F;
+
+        int numberRowInformation = 2;
+        int numberOfVertex = 4;
+
+        float[] vertices = new float[]{
+            -halfWidth,  halfHeight,
+             halfWidth,  halfHeight,
+             halfWidth, -halfHeight,
+            -halfWidth, -halfHeight
+        };
+
+        for (int i = 0; i < numberOfVertex * numberRowInformation; i+=numberRowInformation) {
+            buffer.addVertex(pose, vertices[i],  vertices[i + 1], 0)
+                .setColor(color);
+        }
+    }
+
+    public static void drawTexturedCenteredQuad(
+        VertexConsumer buffer,
+        Matrix4f pose,
+        float width,
+        float height
+    ) {
+        float halfWidth = width / 2.0F;
+        float halfHeight = height / 2.0F;
+
+        int numberRowInformation = 4;
+        int numberOfVertex = 4;
+
+        float[] vertices = new float[]{
+            -halfWidth,  halfHeight, 0, 0,
+             halfWidth,  halfHeight, 1, 0,
+             halfWidth, -halfHeight, 1, 1,
+            -halfWidth, -halfHeight, 0, 1
+        };
+
+        for (int i = 0; i < numberOfVertex * numberRowInformation; i+= numberRowInformation) {
+            buffer
+                .addVertex(pose, vertices[i],  vertices[i + 1], 0)
+                .setUv(vertices[i + 2], vertices[i + 3]);
+        }
+    }
+
+//    public static void drawTexturedQuad(VertexConsumer consumer, Matrix4f matrix, TexturedQuadPoints quad){
+//
+//        for (var vertex : quad.getVertices())
+//        {
+//            consumer
+//                .addVertex(
+//                matrix,
+//                vertex.position().x,
+//                vertex.position().y,
+//                vertex.position().z
+//                )
+//                .setUv(vertex.u(), vertex.v());
+//        }
+//    }
 
     public static Vec3 getScaledDelta(Vec3 original) {
         double x = original.length();
