@@ -74,5 +74,11 @@
 
   "diagram3d.config_screen.force_table.header.force_group": "Force Group",
   "diagram3d.config_screen.force_table.header.force_info": "Details",
-  "diagram3d.config_screen.force_table.header.vectors": "Vectors"
+  "diagram3d.config_screen.force_table.header.vectors": "Vectors",
+
+  "diagram3d.messages.keypress.enabled": "Diagram Enabled",
+  "diagram3d.messages.keypress.suggestion": "Press longer to open the menu",
+  "diagram3d.messages.keypress.disabled": "Diagram Disabled"
+
+
 }

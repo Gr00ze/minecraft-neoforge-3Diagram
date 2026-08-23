@@ -58,19 +58,19 @@ public class Keybinds {
                 Minecraft.getInstance().setScreen(new DisplayConfigScreen());
 
             } else {
-                // Pressione breve → toggle
+                // Short press → toggle
                 ConfigUtils.toggle(ClientConfig.ENABLED);
 
                 if (Minecraft.getInstance().player != null) {
                     Minecraft.getInstance().player.displayClientMessage(
                         ClientConfig.ENABLED.get()
-                            ? Component.literal("Diagram Enabled")
+                            ? Component.translatable("diagram3d.messages.keypress.enabled")
                             .append("\n")
                             .append(
-                                Component.literal("Press longer to open the menu")
+                                Component.translatable("diagram3d.messages.keypress.suggestion")
                                 .withStyle(ChatFormatting.GRAY))
 
-                            : Component.literal("Diagram Disabled"),
+                            : Component.translatable("diagram3d.messages.keypress.disabled"),
                         false
                     );
                 }
