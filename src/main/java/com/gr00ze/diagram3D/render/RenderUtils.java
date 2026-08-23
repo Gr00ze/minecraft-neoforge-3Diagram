@@ -27,8 +27,7 @@ public class RenderUtils {
         float centerY,
         float width,
         float height,
-        int color,
-        int light
+        int color
     ) {
         float halfWidth = width / 2.0F;
         float halfHeight = height / 2.0F;
@@ -54,8 +53,7 @@ public class RenderUtils {
         Matrix4f pose,
         float width,
         float height,
-        int color,
-        int light
+        int color
     ) {
         float halfWidth = width / 2.0F;
         float halfHeight = height / 2.0F;

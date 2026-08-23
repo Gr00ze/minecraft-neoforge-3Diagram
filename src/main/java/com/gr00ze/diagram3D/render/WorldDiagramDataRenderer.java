@@ -560,9 +560,7 @@ public class WorldDiagramDataRenderer {
                 matrix,
                 width,
                 height,
-                ConfigUtils.getColor(INFO_BACKGROUND_COLOR),
-                LightTexture.FULL_BRIGHT
-            );
+                ConfigUtils.getColor(INFO_BACKGROUND_COLOR));
         }
 
 
@@ -628,9 +626,7 @@ public class WorldDiagramDataRenderer {
             0F,
             size + outline,
             size + outline,
-            white,
-            LightTexture.FULL_BRIGHT
-        );
+            white);
         // top-left
         RenderUtils.drawUniformlyColoredCenteredQuad(
             background,
@@ -639,9 +635,7 @@ public class WorldDiagramDataRenderer {
             quarterSize,
             halfSize,
             halfSize,
-            dark,
-            LightTexture.FULL_BRIGHT
-        );
+            dark);
 
         // top-right
         RenderUtils.drawUniformlyColoredCenteredQuad(
@@ -651,9 +645,7 @@ public class WorldDiagramDataRenderer {
             quarterSize,
             halfSize,
             halfSize,
-            light,
-            LightTexture.FULL_BRIGHT
-        );
+            light);
 
         // bottom-left
         RenderUtils.drawUniformlyColoredCenteredQuad(
@@ -663,9 +655,7 @@ public class WorldDiagramDataRenderer {
             -quarterSize,
             halfSize,
             halfSize,
-            light,
-            LightTexture.FULL_BRIGHT
-        );
+            light);
 
         // bottom-right
         RenderUtils.drawUniformlyColoredCenteredQuad(
@@ -675,9 +665,7 @@ public class WorldDiagramDataRenderer {
             -quarterSize,
             halfSize,
             halfSize,
-            dark,
-            LightTexture.FULL_BRIGHT
-        );
+            dark);
 
         pose.popPose();
     }
