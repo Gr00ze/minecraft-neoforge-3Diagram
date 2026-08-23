@@ -156,9 +156,7 @@ public class ForceGroupTable extends AbstractScrollWidget {
 
         if (row.mouseClicked(
             mouseX,
-            mouseY,
             this.getX(),
-            this.getY(),
             this.getWidth(),
             button
         )) {

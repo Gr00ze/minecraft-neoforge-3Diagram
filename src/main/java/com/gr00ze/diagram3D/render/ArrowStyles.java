@@ -7,7 +7,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
 
 import static com.gr00ze.diagram3D.config.ClientConfig.DISPLAY_VECTOR_OUTLINE;
 

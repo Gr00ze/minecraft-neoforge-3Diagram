@@ -97,15 +97,15 @@ public class WorldDiagramDataRenderer {
 
         VectorInfoMode vMode = DISPLAY_VECTORS_INFO.get();
         switch (vMode) {
-            case ALWAYS -> prepareAllVectorInfo(renderPreparation, camera);
+            case ALWAYS -> prepareAllVectorInfo(renderPreparation);
             case ON_LOOK -> prepareLookingVectorInfo(renderPreparation, camera);
             case DISABLED -> {}
         }
 
         CenterOfMassMode cMode = DISPLAY_CENTER_OF_MASS.get();
         switch (cMode){
-            case ICON -> prepareIcon(renderPreparation, camera);
-            case DETAILS -> prepareMassDetails(renderPreparation, camera);
+            case ICON -> prepareIcon(renderPreparation);
+            case DETAILS -> prepareMassDetails(renderPreparation);
             case ICON_DETAILS_ONLOOK -> prepareLookingMassInfo(renderPreparation, camera);
             case DISABLED -> {}
         }
@@ -242,7 +242,7 @@ public class WorldDiagramDataRenderer {
         }
     }
 
-    private static void prepareAllVectorInfo(RenderPreparation renderPreparation, Camera camera) {
+    private static void prepareAllVectorInfo(RenderPreparation renderPreparation) {
         for (PreparedForce prepared : renderPreparation.vectors) {
 
             ForceGroupDisplayConfig config =
@@ -328,7 +328,7 @@ public class WorldDiagramDataRenderer {
 
     }
 
-    private static void prepareIcon(RenderPreparation renderPreparation, Camera camera) {
+    private static void prepareIcon(RenderPreparation renderPreparation) {
         for (PreparedDiagram preparedDiagram : renderPreparation.diagrams) {
             renderPreparation.icons.add(new IconDisplay(preparedDiagram.centerOfMass()));
         }
@@ -343,7 +343,7 @@ public class WorldDiagramDataRenderer {
         renderPreparation.information.add(new InformationDisplay(preparedDiagram.centerOfMass(), components));
     }
 
-    private static void prepareMassDetails(RenderPreparation renderPreparation, Camera camera) {
+    private static void prepareMassDetails(RenderPreparation renderPreparation) {
         for (PreparedDiagram preparedDiagram : renderPreparation.diagrams) {
 
             prepareMassDetail(renderPreparation, preparedDiagram);
@@ -686,22 +686,11 @@ public class WorldDiagramDataRenderer {
             .withStyle(style -> style.withColor(argb));
     }
 
-    public static void drawCenteredText(MultiBufferSource.BufferSource buffer, Font font, Matrix4f matrix, Component text, float width, float height){
-        drawText(
-            buffer,
-            font,
-            matrix,
-            text,
-            -width * 0.5F,
-            -height * 0.5F
-        );
-
-    }
-    public static void drawText(MultiBufferSource.BufferSource buffer, Font font, Matrix4f matrix, Component text, float width, float height){
+    public static void drawText(MultiBufferSource.BufferSource buffer, Font font, Matrix4f matrix, Component text, float x, float y){
         font.drawInBatch(
             text,
-            width,
-            height,
+            x,
+            y,
             0xFFFFFFFF,
             false,
             matrix,

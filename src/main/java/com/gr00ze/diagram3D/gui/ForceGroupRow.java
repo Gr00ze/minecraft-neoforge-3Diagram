@@ -8,12 +8,10 @@ import dev.ryanhcode.sable.api.physics.force.ForceGroups;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.resources.ResourceLocation;
 
 public class ForceGroupRow {
 
-    private static final int TEXT_COLOR = 0xFFFFFFFF;
     private static final int ACTIVE_COLOR = 0xFF55FF55;
     private static final int INACTIVE_COLOR = 0xFF888888;
     private static final int ACTIVE_BACKGROUND_COLOR = 0x55AAAAAA;
@@ -131,9 +129,7 @@ public class ForceGroupRow {
 
     public boolean mouseClicked(
         double mouseX,
-        double mouseY,
         int x,
-        int y,
         int tableWidth,
         int button) {
         if (button != 0) {
