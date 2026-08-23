@@ -116,7 +116,7 @@ public class FixedPanel extends AbstractContainerEventHandler
 
     @Override
     public void updateNarration(
-        NarrationElementOutput narrationElementOutput
+        @NotNull NarrationElementOutput narrationElementOutput
     ) {
     }
 
