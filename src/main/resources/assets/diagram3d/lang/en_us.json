@@ -1,79 +1,78 @@
 {
-  "diagram3d.configuration.radius": "Radius",
-  "diagram3d.configuration.enabled": "Enabled",
-  "diagram3d.configuration.display_vectors_info": "Display Vectors Info",
-  "diagram3d.configuration.display_center_of_mass": "Display Mass Mode",
-
-  "diagram3d.configuration.force_group_configs": "Force group configs",
-  "diagram3d.configuration.display_vectors_outline": "Vectors Outline",
-  "diagram3d.configuration.proportional_vector_scaling_factor": "Proportional scaling factor",
-  "diagram3d.configuration.quadratic_vector_scaling_factor": "Quadratic scaling factor",
-
-  "diagram3d.configuration.radius.tooltip": "The scan radius for which the player will ask information for sublevels to the server",
-  "diagram3d.configuration.enabled.tooltip": "Enable the entire mod",
-  "diagram3d.configuration.display_vectors.tooltip": "Enable the vector rendering",
-  "diagram3d.configuration.display_vectors_info.tooltip": "Enable the display vector info rendering",
-
-  "diagram3d.configuration.force_group_configs.tooltip": "Configure the display of individual force groups.\nPress the 'toggle key' inside a world to configure it",
-  "diagram3d.configuration.display_vectors_outline.tooltip": "Enable a white outline of forces",
-  "diagram3d.configuration.proportional_vector_scaling_factor.tooltip": "Coefficient to scale or reduce vectors linearly. Considering \nx the original size\nP the proportional factor\nQ the quadratic factor\nThe function is:\n Q * x^2 + P * x",
-  "diagram3d.configuration.quadratic_vector_scaling_factor.tooltip": "Coefficient to scale or reduce vectors quadratically. Considering \nx the original size\nP the proportional factor\nQ the quadratic factor\nThe function is:\n Q * x^2 + P * x",
-
-  "diagram3d.configuration.vectors": "Vectors Section",
-  "diagram3d.configuration.vectors.tooltip": "This section manage global vector options",
-  "diagram3d.configuration.vectors.button": "Open",
-
-  "diagram3d.configuration.info_display": "Info display Section",
-  "diagram3d.configuration.info_display.tooltip": "This section manage global info_display options",
-  "diagram3d.configuration.info_display.button": "Open",
-
-  "diagram3d.configuration.Custom": "Custom Section",
-  "diagram3d.configuration.Custom.tooltip": "This section is not managed here",
-  "diagram3d.configuration.Custom.button": "Show",
-
   "diagram3d.configuration.title": "Diagram 3D Configuration",
 
-  "diagram3d.configuration.section.diagram3d.client.toml.title": "Client Configuration",
-  "diagram3d.configuration.section.diagram3d.client.toml": "Diagram 3D Client Settings",
+  "diagram3d.configuration.enabled": "Enabled",
+  "diagram3d.configuration.enabled.tooltip": "Enable or disable the entire mod.",
 
+  "diagram3d.configuration.radius": "Scan Radius",
+  "diagram3d.configuration.radius.tooltip": "The radius around the player within which information about sublevels is requested from the server.",
 
+  "diagram3d.configuration.force_group_configs": "Force Group Settings",
+  "diagram3d.configuration.force_group_configs.tooltip": "Configure the display settings for individual force groups.\nPress the §eToggle Key§r while in a world to open the configuration.",
 
-  "diagram3d.configuration.display_center_of_mass.tooltip": "The display center of the mass mode",
-  "diagram3d.configuration.display_center_of_mass.disabled": "Disabled",
-  "diagram3d.configuration.display_center_of_mass.icon": "Icon",
-  "diagram3d.configuration.display_center_of_mass.details": "Details",
-  "diagram3d.configuration.display_center_of_mass.icon_details_onlook": "Dynamic details",
+  "diagram3d.configuration.vectors": "Vectors",
+  "diagram3d.configuration.vectors.tooltip": "Configure global vector display settings.",
+  "diagram3d.configuration.vectors.button": "Open",
 
-  "diagram3d.configuration.display_vector_mode": "Display Vector Mode",
-  "diagram3d.configuration.display_vector_mode.tooltip": "Selectable options: Disabled, Separated, Merged",
+  "diagram3d.configuration.vector_style": "Vector Style",
+  "diagram3d.configuration.vector_style.tooltip": "Choose the visual style used to render vectors.",
+  "diagram3d.configuration.vector_style.slim": "Slim",
+  "diagram3d.configuration.vector_style.textured": "Textured",
+
+  "diagram3d.configuration.display_vector_mode": "Vector Display Mode",
+  "diagram3d.configuration.display_vector_mode.tooltip": "Choose how vectors are displayed.",
   "diagram3d.configuration.display_vector_mode.disabled": "Disabled",
   "diagram3d.configuration.display_vector_mode.separated": "Separated",
   "diagram3d.configuration.display_vector_mode.merged": "Merged",
 
+  "diagram3d.configuration.proportional_vector_scaling_factor": "Linear Scaling Factor",
+  "diagram3d.configuration.proportional_vector_scaling_factor.tooltip": "Controls the §alinear§r component of vector scaling.\n\n§bP§r = linear scaling factor\n§dQ§r = quadratic scaling factor\n§7x§r = original size\n\nThe resulting scale is:\n§dQ§r × §7x§r² + §bP§r × §7x§r",
+
+  "diagram3d.configuration.quadratic_vector_scaling_factor": "Quadratic Scaling Factor",
+  "diagram3d.configuration.quadratic_vector_scaling_factor.tooltip": "Controls the §dquadratic§r component of vector scaling.\n\n§bP§r = linear scaling factor\n§dQ§r = quadratic scaling factor\n§7x§r = original size\n\nThe resulting scale is:\n§dQ§r × §7x§r² + §bP§r × §7x§r",
+
+  "diagram3d.configuration.display_vectors_outline": "Vector Outline",
+  "diagram3d.configuration.display_vectors_outline.tooltip": "Display a §fwhite§r outline around vectors.",
+
+  "diagram3d.configuration.info_display": "Information Display",
+  "diagram3d.configuration.info_display.tooltip": "Configure global information display settings.",
+  "diagram3d.configuration.info_display.button": "Open",
+
+  "diagram3d.configuration.display_center_of_mass": "Center of Mass Display",
+  "diagram3d.configuration.display_center_of_mass.tooltip": "Choose how centers of mass are displayed.\n\n§bIcon§r: Display only the icon.\n§eDetails§r: Always display detailed information.\n§aDynamic Details§r: Display detailed information only when looking at a center of mass.",
+  "diagram3d.configuration.display_center_of_mass.disabled": "Disabled",
+  "diagram3d.configuration.display_center_of_mass.icon": "Icon",
+  "diagram3d.configuration.display_center_of_mass.details": "Details",
+  "diagram3d.configuration.display_center_of_mass.icon_details_onlook": "Dynamic Details",
+
+  "diagram3d.configuration.display_vectors_info": "Vector Information Display",
+  "diagram3d.configuration.display_vectors_info.tooltip": "Choose when detailed information about vectors is displayed.\n\n§cDisabled§r: Do not display information.\n§eAlways§r: Always display detailed information.\n§aDynamic Details§r: Display detailed information only when looking at a vector.",
   "diagram3d.configuration.display_vectors_info.disabled": "Disabled",
   "diagram3d.configuration.display_vectors_info.always": "Always",
-  "diagram3d.configuration.display_vectors_info.on_look": "Dynamic details",
+  "diagram3d.configuration.display_vectors_info.on_look": "Dynamic Details",
 
-  "diagram3d.configuration.gui_background_color": "Gui background color",
-  "diagram3d.configuration.gui_background_color.tooltip": "Modify the color background of the custom gui",
+  "diagram3d.configuration.info_background_color": "Information Background Color",
+  "diagram3d.configuration.info_background_color.tooltip": "Set the background color of information displays.\nOnly applies when \"Information Textured Background\" is disabled.",
 
-  "diagram3d.configuration.gui_background_use_texture": "Gui Textured background",
-  "diagram3d.configuration.gui_background_use_texture.tooltip": "Enable the background with texture",
+  "diagram3d.configuration.info_background_use_texture": "Information Textured Background",
+  "diagram3d.configuration.info_background_use_texture.tooltip": "Use a textured background for information displays.",
 
-  "diagram3d.configuration.info_background_color": "Display background color",
-  "diagram3d.configuration.info_background_color.tooltip": "Modify the color background of the custom gui",
+  "diagram3d.configuration.gui_background_color": "GUI Background Color",
+  "diagram3d.configuration.gui_background_color.tooltip": "Set the background color of the custom GUI.\nOnly applies when \"GUI Textured Background\" is disabled.",
 
-  "diagram3d.configuration.info_background_use_texture": "Info textured background",
-  "diagram3d.configuration.info_background_use_texture.tooltip": "Enable the background with texture",
+  "diagram3d.configuration.gui_background_use_texture": "GUI Textured Background",
+  "diagram3d.configuration.gui_background_use_texture.tooltip": "Use a textured background for the custom GUI.",
 
-  "diagram3d.configuration.vector_style": "Vector style",
-  "diagram3d.configuration.vector_style.tooltip": "Slim or Textured can be selected",
-  "diagram3d.configuration.vector_style.slim": "Slim",
-  "diagram3d.configuration.vector_style.textured": "Textured",
+  "diagram3d.configuration.custom": "Custom",
+  "diagram3d.configuration.custom.tooltip": "This section is not managed by Diagram 3D.",
+  "diagram3d.configuration.custom.button": "Show",
+
+  "diagram3d.configuration.section.diagram3d.client.toml.title": "Client Configuration",
+  "diagram3d.configuration.section.diagram3d.client.toml": "Diagram 3D Client Settings",
 
   "diagram3d.config_screen.more_settings": "More...",
-  "diagram3d.config_screen.force_table.header.force_info": "Details",
-  "diagram3d.config_screen.force_table.header.vectors": "Vectors",
-  "diagram3d.config_screen.force_table.header.force_group": "Force Group"
 
+  "diagram3d.config_screen.force_table.header.force_group": "Force Group",
+  "diagram3d.config_screen.force_table.header.force_info": "Details",
+  "diagram3d.config_screen.force_table.header.vectors": "Vectors"
 }
