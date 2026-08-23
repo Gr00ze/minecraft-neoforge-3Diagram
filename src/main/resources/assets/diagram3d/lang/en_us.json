@@ -78,7 +78,8 @@
 
   "diagram3d.messages.keypress.enabled": "Diagram Enabled",
   "diagram3d.messages.keypress.suggestion": "Press longer to open the menu",
-  "diagram3d.messages.keypress.disabled": "Diagram Disabled"
+  "diagram3d.messages.keypress.disabled": "Diagram Disabled",
 
-
+  "key.categories.diagram3d": "Diagram 3D",
+  "key.diagram3d.toggle": "Toggle Mod (Hold to Open Menu)"
 }
