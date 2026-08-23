@@ -170,7 +170,7 @@ public class ClientConfig
             false
         );
 
-        BUILDER.push("Custom");
+        BUILDER.push("custom");
         FORCE_GROUP_CONFIGS_VALUE = BUILDER
             .define(
                 "force_group_configs",
