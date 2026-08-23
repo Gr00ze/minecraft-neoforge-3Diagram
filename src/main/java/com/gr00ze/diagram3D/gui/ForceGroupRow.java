@@ -8,6 +8,7 @@ import dev.ryanhcode.sable.api.physics.force.ForceGroups;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.resources.ResourceLocation;
 
 public class ForceGroupRow {
@@ -15,15 +16,18 @@ public class ForceGroupRow {
     private static final int TEXT_COLOR = 0xFFFFFFFF;
     private static final int ACTIVE_COLOR = 0xFF55FF55;
     private static final int INACTIVE_COLOR = 0xFF888888;
+    private static final int ACTIVE_BACKGROUND_COLOR = 0x55AAAAAA;
+    private static final int INACTIVE_BACKGROUND_COLOR = 0xCC101010;
 
     private final ForceGroup forceGroup;
     private final int rowHeight;
-    private final int rowPadding;
+    private final Insets buttonBox;
 
     public ForceGroupRow(ForceGroup forceGroup, int rowHeight) {
         this.forceGroup = forceGroup;
         this.rowHeight = rowHeight;
-        this.rowPadding = 1;
+
+        buttonBox = new Insets(5, 6, 8,8);
     }
 
     public void render(
@@ -35,6 +39,7 @@ public class ForceGroupRow {
         int mouseY
     ) {
         Minecraft minecraft = Minecraft.getInstance();
+        Font font  = minecraft.font;
 
         ResourceLocation id = getId();
 
@@ -42,16 +47,16 @@ public class ForceGroupRow {
         ForceGroupDisplayConfig config =
             ClientConfig.getForceGroupConfig(id);
 
-        int fontYOffset = (int)(minecraft.font.lineHeight * 0.5);
+        float fontYOffset = font.lineHeight * 0.5F;
+
         guiGraphics.drawString(
-            minecraft.font,
-            forceGroup.name(),
-            x + 8,
+            font,
+            forceGroup.name().getVisualOrderText(),
+            x + 8F,
             y + fontYOffset,
-            forceGroup.color()
+            forceGroup.color(),
+            true
         );
-
-
 
         int vectorsX = x + ForceGroupTable.getVectorRightOffset(width);
         int infoX = x + ForceGroupTable.getDetailsRightOffset(width);
@@ -77,15 +82,15 @@ public class ForceGroupRow {
 
     private void renderToggle(
         GuiGraphics guiGraphics,
-        int centerX,
+        int x,
         int y,
         boolean active,
         int mouseX,
         int mouseY
     ) {
-        String text = active ? "✓" : "✕";
 
-        boolean hovered = mouseOver(mouseX, mouseY, centerX, y);
+
+        boolean hovered = mouseOver(mouseX, mouseY, x, y);
 
         int color;
 
@@ -99,22 +104,28 @@ public class ForceGroupRow {
                 : INACTIVE_COLOR;
         }
 
+
         guiGraphics.fill(
-            centerX - getXPadding(),
-            y,
-            centerX + getXPadding(),
-            y + rowHeight,
-            hovered ? 0x55AAAAAA : 0x55555555
+            (int) (x - this.buttonBox.left() ),
+            (int) (y + this.rowHeight * 0.5 -  this.buttonBox.top()),
+            (int) (x + this.buttonBox.right()),
+            (int) (y + this.rowHeight * 0.5 + this.buttonBox.bottom() ),
+            hovered ? ACTIVE_BACKGROUND_COLOR : INACTIVE_BACKGROUND_COLOR
         );
 
+        String text = active ? "✓" : "✕";
         Font font = Minecraft.getInstance().font;
-        int fontYOffset = (int)(font.lineHeight * 0.5);
-        guiGraphics.drawCenteredString(
-            Minecraft.getInstance().font,
+
+
+        float textX = x - font.width(text) * 0.5F;
+        float textY = y + (rowHeight - font.lineHeight)  * 0.5F;
+        guiGraphics.drawString(
+            font,
             text,
-            centerX,
-            y + fontYOffset,
-            color
+            textX,
+            textY,
+            color,
+            false
         );
     }
 
@@ -122,19 +133,20 @@ public class ForceGroupRow {
         double mouseX,
         double mouseY,
         int x,
-        int width,
-        int button
-    ) {
+        int y,
+        int tableWidth,
+        int button) {
         if (button != 0) {
             return false;
         }
 
-        int vectorsX = x + ForceGroupTable.getVectorRightOffset(width);
-        int infoX = x + ForceGroupTable.getDetailsRightOffset(width);
+
+        int vectorsX = x + ForceGroupTable.getVectorRightOffset(tableWidth);
+        int infoX = x + ForceGroupTable.getDetailsRightOffset(tableWidth);
 
         if (
-            mouseX >= vectorsX - getXPadding()
-            && mouseX <= vectorsX + getXPadding()
+            mouseX >= vectorsX - this.buttonBox.left()
+            && mouseX <= vectorsX + this.buttonBox.right()
 
         ) {
             ConfigUtils.toggleVectors(getId());
@@ -142,8 +154,8 @@ public class ForceGroupRow {
         }
 
         if (
-            mouseX >= infoX - getXPadding()
-            && mouseX <= infoX + getXPadding()
+            mouseX >= infoX - this.buttonBox.left()
+            && mouseX <= infoX + this.buttonBox.right()
 
         ) {
             ConfigUtils.toggleInfo(getId());
@@ -159,16 +171,14 @@ public class ForceGroupRow {
         int centerX,
         int y
     ) {
-        return mouseX >= centerX - getXPadding()
-            && mouseX <= centerX + getXPadding()
-            && mouseY >= y + this.rowPadding
-            && mouseY <= y + rowHeight - this.rowPadding;
+        return mouseX >= centerX - this.buttonBox.left()
+            && mouseX <= centerX + this.buttonBox.right()
+            && mouseY >= y + this.rowHeight * 0.5 - this.buttonBox.top()
+            && mouseY <= y + this.rowHeight * 0.5 + this.buttonBox.bottom();
     }
 
 
-    private int getXPadding() {
-        return 8;
-    }
+
 
     private ResourceLocation getId() {
         return ForceGroups.REGISTRY.getKey(forceGroup);
