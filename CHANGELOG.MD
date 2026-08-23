@@ -1,5 +1,13 @@
 # Changelog
 
+## V1.0.0 — Release
+
+- Fixed some alignment issues in the custom config screen
+- Added an option to enable a background texture for the force and mass displays
+- Added an option to enable a background texture for the custom config screen
+- Added configuration options to set background colors for the displays and custom config screen
+- Added an option to select the vector style: Slim or Textured
+
 ## V0.4.0 — Display on look - Merged Forces, Outline, Vector scaling configuration
 
 - Added option to visualize merged or separated forces
