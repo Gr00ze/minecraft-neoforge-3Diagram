@@ -29,9 +29,7 @@ public class Diagram3DClient {
 
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
-        // Some client setup code
-//        Diagram3D.LOGGER.info("HELLO FROM CLIENT SETUP");
-//        Diagram3D.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+
         Diagram3D.LOGGER.info("Mod initialized");
         RenderTypes.init();
     }
