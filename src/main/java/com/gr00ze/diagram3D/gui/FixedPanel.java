@@ -1,10 +1,9 @@
 package com.gr00ze.diagram3D.gui;
 
 import com.gr00ze.diagram3D.Diagram3D;
-import com.gr00ze.diagram3D.config.ClientConfig;
 import com.gr00ze.diagram3D.config.ConfigUtils;
 import com.gr00ze.diagram3D.render.RenderTypes;
-import com.gr00ze.diagram3D.render.RenderUtils;
+import com.gr00ze.libs.RenderFunctions;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -15,7 +14,6 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +82,7 @@ public class FixedPanel extends AbstractContainerEventHandler
             VertexConsumer buffer = guiGraphics.bufferSource().getBuffer(
                 RenderTypes.texturedBackground(BACKGROUND_TEXTURE)
             );
-            RenderUtils.drawTexturedRect(
+            RenderFunctions.drawTexturedRect(
                 buffer,
                 guiGraphics.pose().last().pose(),
                 x,

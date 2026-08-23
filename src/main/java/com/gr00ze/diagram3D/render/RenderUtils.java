@@ -1,168 +1,135 @@
 package com.gr00ze.diagram3D.render;
 
+import com.gr00ze.diagram3D.config.ConfigUtils;
+import com.gr00ze.libs.GeometryUtils;
+import com.gr00ze.libs.RenderFunctions;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Camera;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
-import static com.gr00ze.diagram3D.config.ClientConfig.*;
+import javax.annotation.Nullable;
+
+import static com.gr00ze.diagram3D.Utils.getScaledDelta;
+import static com.gr00ze.diagram3D.config.ClientConfig.INFO_BACKGROUND_COLOR;
+import static com.gr00ze.diagram3D.config.ClientConfig.INFO_BACKGROUND_USE_TEXTURE;
+import static com.gr00ze.diagram3D.render.WorldDiagramDataRenderer.INFO_BACKGROUND_TEXTURE;
 
 public class RenderUtils {
+    /**
+     * Method to identify if a player is looking a specific point with a threshold of tolerance
+     * **/
+    public static boolean isPlayerLooking(Camera camera, Vec3 position) {
+        Vec3 cameraPos = camera.getPosition();
 
+        Vector3f look = camera.getLookVector().normalize();
+        Vector3f direction = position.subtract(cameraPos).normalize().toVector3f();
 
+        double distance = cameraPos.distanceTo(position);
 
-//    public static void drawUniformlyColoredQuad(VertexConsumer consumer, Matrix4f matrix, QuadPoints quad, int argb,int packedLight){
-//
-//        for (Vector3f point : quad.getPoints())
-//        {
-//            consumer.addVertex(matrix, point.x,  point.y, point.z)
-//                .setColor(argb)
-//                .setLight(packedLight);
-//        }
-//    }
+        double angle = Math.atan(0.2 / Math.max(distance, 0.1));
 
-    public static void drawUniformlyColoredCenteredQuad(
-        VertexConsumer buffer,
-        Matrix4f pose,
-        float centerX,
-        float centerY,
-        float width,
-        float height,
-        int color
-    ) {
-        float halfWidth = width / 2.0F;
-        float halfHeight = height / 2.0F;
+        double threshold = Math.cos(angle);
 
-        int numberRowInformation = 2;
-        int numberOfVertex = 4;
-
-        float[] vertices = new float[]{
-          centerX - halfWidth, centerY + halfHeight,
-          centerX + halfWidth, centerY + halfHeight,
-          centerX + halfWidth, centerY - halfHeight,
-          centerX - halfWidth, centerY - halfHeight,
-        };
-
-        for (int i = 0; i < numberOfVertex * numberRowInformation; i+=numberRowInformation) {
-            buffer.addVertex(pose, vertices[i],  vertices[i + 1], 0)
-                .setColor(color);
-        }
+        return look.dot(direction) >= threshold;
     }
 
-    public static void drawUniformlyColoredCenteredQuad(
-        VertexConsumer buffer,
-        Matrix4f pose,
-        float width,
-        float height,
-        int color
+    public static @Nullable GeometryUtils.ClosestPoints getLookingPoints(
+        Camera camera,
+        Vec3 startPosition,
+        Vec3 delta
     ) {
-        float halfWidth = width / 2.0F;
-        float halfHeight = height / 2.0F;
+        final double MAX_LOOK_DISTANCE = 50.0;
+        final double LOOK_THRESHOLD = 0.5;
+        final double EPSILON = 1e-8;
 
-        int numberRowInformation = 2;
-        int numberOfVertex = 4;
+        Vec3 cameraPosition = camera.getPosition();
+        Vec3 lookDirection = new Vec3(
+            camera.getLookVector().normalize()
+        );
 
-        float[] vertices = new float[]{
-            -halfWidth,  halfHeight,
-             halfWidth,  halfHeight,
-             halfWidth, -halfHeight,
-            -halfWidth, -halfHeight
-        };
+        Vec3 rayCastEnd = cameraPosition.add(
+            lookDirection.scale(MAX_LOOK_DISTANCE)
+        );
 
-        for (int i = 0; i < numberOfVertex * numberRowInformation; i+=numberRowInformation) {
-            buffer.addVertex(pose, vertices[i],  vertices[i + 1], 0)
-                .setColor(color);
-        }
+        Vec3 lineEnd = startPosition.add(
+            getScaledDelta(delta)
+        );
+
+        return GeometryUtils.closestPointsWithin(
+            cameraPosition,
+            rayCastEnd,
+            startPosition,
+            lineEnd,
+            LOOK_THRESHOLD,
+            EPSILON
+        ).orElse(null);
     }
 
-    public static void drawTexturedCenteredQuad(
-        VertexConsumer buffer,
-        Matrix4f pose,
-        float width,
-        float height
-    ) {
-        float halfWidth = width / 2.0F;
-        float halfHeight = height / 2.0F;
-
-        int numberRowInformation = 4;
-        int numberOfVertex = 4;
-
-        float[] vertices = new float[]{
-            -halfWidth,  halfHeight, 0, 0,
-             halfWidth,  halfHeight, 1, 0,
-             halfWidth, -halfHeight, 1, 1,
-            -halfWidth, -halfHeight, 0, 1
-        };
-
-        for (int i = 0; i < numberOfVertex * numberRowInformation; i+= numberRowInformation) {
-            buffer
-                .addVertex(pose, vertices[i],  vertices[i + 1], 0)
-                .setUv(vertices[i + 2], vertices[i + 3]);
-        }
-    }
-    //It stretches the texture if repeatTexture is false
-    public static void drawTexturedRect(
-        VertexConsumer buffer,
-        Matrix4f pose,
-        float startX,
-        float startY,
-        float width,
-        float height,
-        boolean repeatTexture
-    ) {
-
-        float uMax = 1, vMax = 1;
-
-        if (repeatTexture) {
-            uMax = width / 16;
-            vMax = height / 16;
-        }
-
-        int numberRowInformation = 4;
-        int numberOfVertex = 4;
-
-
-
-        float[] vertices = new float[]{
-            startX        ,  startY, 0, 0,
-            startX        ,  startY + height, 0, vMax,
-            startX + width,  startY + height, uMax, vMax,
-            startX + width,  startY, uMax, 0,
-        };
-
-        for (int i = 0; i < numberOfVertex * numberRowInformation; i+= numberRowInformation) {
-            buffer
-                .addVertex(pose, vertices[i],  vertices[i + 1], 0)
-                .setUv(vertices[i + 2], vertices[i + 3]);
-        }
+    public static MutableComponent coloredText(String text, int argb){
+        return Component.literal(text)
+            .withStyle(style -> style.withColor(argb));
     }
 
-//    public static void drawTexturedQuad(VertexConsumer consumer, Matrix4f matrix, TexturedQuadPoints quad){
-//
-//        for (var vertex : quad.getVertices())
-//        {
-//            consumer
-//                .addVertex(
-//                matrix,
-//                vertex.position().x,
-//                vertex.position().y,
-//                vertex.position().z
-//                )
-//                .setUv(vertex.u(), vertex.v());
-//        }
-//    }
+    public static void drawText(MultiBufferSource.BufferSource buffer, Font font, Matrix4f matrix, Component text, float x, float y){
+        font.drawInBatch(
+            text,
+            x,
+            y,
+            0xFFFFFFFF,
+            false,
+            matrix,
+            buffer,
+            Font.DisplayMode.SEE_THROUGH,
+            0,
+            LightTexture.FULL_BRIGHT
+        );
+    }
 
-    public static Vec3 getScaledDelta(Vec3 original) {
-        double x = original.length();
+    public static void applyTransformations(PoseStack pose, Camera camera, Vec3 position, Vec3 cameraPosition) {
+        pose.translate(
+            position.x - cameraPosition.x,
+            position.y - cameraPosition.y,
+            position.z - cameraPosition.z
+        );
+        pose.mulPose(camera.rotation());
+        pose.scale(
+            0.025f,
+            -0.025f,
+            0.025f
+        );
+    }
 
-        if (x == 0.0) {
-            return Vec3.ZERO;
+    public static void drawTextBackground(MultiBufferSource.BufferSource buffer, Matrix4f matrix, float width, float height){
+        VertexConsumer background;
+        if(INFO_BACKGROUND_USE_TEXTURE.get())
+        {
+            background = buffer.getBuffer(RenderTypes.texturedBackground(INFO_BACKGROUND_TEXTURE));
+            RenderFunctions.drawTexturedCenteredQuad(
+                background,
+                matrix,
+                width,
+                height
+            );
         }
 
-        double targetLength =
-            x * x * QUADRATIC_VECTOR_SCALING_FACTOR.get()
-                + x * PROPORTIONAL_VECTOR_SCALING_FACTOR.get();
+        else{
+            background = buffer.getBuffer(RenderTypes.BACKGROUND_QUADS);
+            RenderFunctions.drawUniformlyColoredCenteredQuad(
+                background,
+                matrix,
+                width,
+                height,
+                ConfigUtils.getColor(INFO_BACKGROUND_COLOR));
+        }
 
-        return original.normalize().scale(targetLength);
     }
 
 
