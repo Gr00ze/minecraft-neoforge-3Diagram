@@ -71,13 +71,6 @@ public class DiagramDataManager {
         if (ticksWithoutUpdate <= UPDATE_REQUEST_TICK_INTERVAL)
             return;
 
-//        if (diagramRequestQueue.size() == 1)
-//        {
-//            diagramRequestQueue.clear();
-//            waitingForResponse = false;
-//            return;
-//
-//        }
 
         //Still elaborating requests
         if (!diagramRequestQueue.isEmpty())
