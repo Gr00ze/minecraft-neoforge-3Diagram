@@ -1,4 +1,4 @@
-package com.gr00ze.diagram3D.utils;
+package com.gr00ze.libs;
 
 import net.minecraft.world.phys.Vec3;
 

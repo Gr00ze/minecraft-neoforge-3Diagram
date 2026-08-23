@@ -1,6 +1,7 @@
 package com.gr00ze.diagram3D.render;
 
 import com.gr00ze.diagram3D.Diagram3D;
+import com.gr00ze.libs.RenderFunctions;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -34,7 +35,7 @@ public class ArrowStyles {
                 0xFFFFFFFF
             );
 
-            RenderUtils.drawPositionColorLine(
+            RenderFunctions.drawPositionColorLine(
                 consumer,
                 poseStack,
                 origin,
@@ -55,7 +56,7 @@ public class ArrowStyles {
             color
         );
 
-        RenderUtils.drawPositionColorLine(
+        RenderFunctions.drawPositionColorLine(
             consumer,
             poseStack,
             origin,
@@ -106,7 +107,7 @@ public class ArrowStyles {
 
 
         // origin V
-        RenderUtils.drawPositionColorLine(
+        RenderFunctions.drawPositionColorLine(
             consumer,
             poseStack,
             end,
@@ -114,7 +115,7 @@ public class ArrowStyles {
             color
         );
 
-        RenderUtils.drawPositionColorLine(
+        RenderFunctions.drawPositionColorLine(
             consumer,
             poseStack,
             end,
@@ -203,7 +204,7 @@ public class ArrowStyles {
             side.scale(headSize)
         );
 
-        RenderUtils.drawTexturedTriangle(
+        RenderFunctions.drawTexturedTriangle(
             consumer,
             poseStack,
             end,

@@ -5,7 +5,7 @@ import com.gr00ze.diagram3D.Diagram3D;
 import com.gr00ze.diagram3D.config.ConfigUtils;
 import com.gr00ze.diagram3D.config.ForceGroupDisplayConfig;
 import com.gr00ze.diagram3D.data.DiagramRecords.*;
-import com.gr00ze.diagram3D.utils.GeometryUtils;
+import com.gr00ze.libs.GeometryUtils;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
