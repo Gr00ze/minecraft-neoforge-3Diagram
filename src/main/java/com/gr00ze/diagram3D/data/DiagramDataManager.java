@@ -10,6 +10,7 @@ import dev.simulated_team.simulated.network.packets.contraption_diagram.RequestD
 import foundry.veil.api.network.VeilPacketManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
@@ -21,8 +22,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.gr00ze.diagram3D.config.ClientConfig.*;
-import static com.gr00ze.diagram3D.data.DiagramDataResolver.convertDiagramData;
-import static com.gr00ze.diagram3D.data.DiagramDataResolver.getCenterOfMass;
 
 import com.gr00ze.diagram3D.data.DiagramRecords.*;
 
@@ -125,14 +124,17 @@ public class DiagramDataManager {
 
 
         UUID completed = diagramRequestQueue.poll();
-        Level level = Minecraft.getInstance().level;
+        ClientLevel level = Minecraft.getInstance().level;
 
-        if(serverData == null || level == null){ return;}
+        if (serverData == null || level == null) {
+            waitingForResponse = false;
+            sendNextRequest();
+            return;
+        }
 
         diagramDataCache.put(completed, new DiagramDataCache(
-            convertDiagramData(completed, serverData),
-            serverData.mass(),
-            getCenterOfMass(level, completed),
+            completed,
+            serverData,
             level.getGameTime()
         ));
 
