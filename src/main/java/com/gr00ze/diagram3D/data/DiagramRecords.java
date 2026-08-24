@@ -1,30 +1,31 @@
 package com.gr00ze.diagram3D.data;
 
+import dev.simulated_team.simulated.network.packets.contraption_diagram.DiagramDataPacket;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.UUID;
 
 public class DiagramRecords {
 
     public record DiagramDataCache(
-        List<ResolvedForceGroup> groups,
-        double mass,
-        Vec3 centerOfMass,
+        UUID completed,
+        DiagramDataPacket serverData,
         long lastUpdate
     ) {}
 
 
-    public record ResolvedForceGroup(
+    public record InWorldForceGroup(
         Component name,
         @Nullable Component description,
         int color,
         boolean defaultDisplayed,
-        List<ResolvedForce> forces
+        List<InWorldForce> forces
     ) {}
 
-    public record ResolvedForce(
+    public record InWorldForce(
         Vec3 origin,
         Vec3 delta
     ) {}
