@@ -4,11 +4,14 @@ import com.gr00ze.diagram3D.config.ClientConfig;
 import com.gr00ze.diagram3D.Diagram3D;
 import com.gr00ze.diagram3D.config.ConfigUtils;
 import com.gr00ze.diagram3D.config.ForceGroupDisplayConfig;
+import com.gr00ze.diagram3D.data.DiagramDataResolver;
 import com.gr00ze.diagram3D.data.DiagramRecords.*;
+import com.gr00ze.diagram3D.render.RenderPreparation.*;
 import com.gr00ze.libs.RenderFunctions;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import dev.simulated_team.simulated.network.packets.contraption_diagram.DiagramDataPacket;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -26,13 +29,12 @@ import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
 
 import static com.gr00ze.diagram3D.config.ClientConfig.*;
 import static com.gr00ze.diagram3D.data.DiagramDataManager.diagramDataCache;
 import static com.gr00ze.diagram3D.Utils.getScaledDelta;
-import static com.gr00ze.diagram3D.render.RenderPreparation.PreparedForce;
-import static com.gr00ze.diagram3D.render.RenderPreparation.InformationDisplay;
-import static com.gr00ze.diagram3D.render.RenderPreparation.IconDisplay;
 
 
 @EventBusSubscriber(modid = Diagram3D.MOD_ID, value = Dist.CLIENT)
@@ -43,6 +45,7 @@ public class WorldDiagramDataRenderer {
             Diagram3D.MOD_ID,
             "textures/info/background.png"
         );
+
 
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event){
@@ -73,9 +76,12 @@ public class WorldDiagramDataRenderer {
 
     private static RenderPreparation prepareData(Camera camera) {
 
-        RenderPreparation renderPreparation = new RenderPreparation();
 
-        loadForceGroupConfig(renderPreparation);
+        List<ConvertedDiagramData> convertedDiagramDataList = new ArrayList<>();
+        prepareDiagramData(convertedDiagramDataList);
+
+        RenderPreparation renderPreparation = new RenderPreparation();
+        loadForceGroupConfig(convertedDiagramDataList, renderPreparation);
 
 
         VectorMode displayVectors = VECTOR_MODE.get();
@@ -104,19 +110,48 @@ public class WorldDiagramDataRenderer {
         return renderPreparation;
     }
 
+    private static void prepareDiagramData(List<ConvertedDiagramData> convertedDiagramDataList) {
+
+        for (DiagramDataCache cached : diagramDataCache.values()) {
+            DiagramDataPacket cachedPacked = cached.serverData();
+            UUID sublevelID = cached.completed();
+            long lastUpdate = cached.lastUpdate();
+
+
+
+            ConvertedDiagramData convertedDiagramData =
+                new ConvertedDiagramData(
+                    DiagramDataResolver
+                        .convertDiagramData(
+                            sublevelID,
+                            cachedPacked
+                        ),
+                    DiagramDataResolver
+                        .getInWorldMassPosition(sublevelID),
+                    cachedPacked.mass()
+                );
+
+            convertedDiagramDataList.add(convertedDiagramData);
+
+
+
+
+        }
+        //diagramDataCache.clear();
+    }
+
     /**
      * Loads the force groups from the diagram cache and associates each forceGroup
      * with its display configuration.
      */
-    private static void loadForceGroupConfig(
-        RenderPreparation renderPreparation
+    private static void loadForceGroupConfig(List<ConvertedDiagramData> convertedDiagramDataList, RenderPreparation renderPreparation
     ) {
-        for (DiagramDataCache cached : diagramDataCache.values()) {
+        for (ConvertedDiagramData data : convertedDiagramDataList) {
 
             List<RenderPreparation.PreparedGroup> preparedGroups =
                 new ArrayList<>();
 
-            for (ResolvedForceGroup forceGroup : cached.groups()) {
+            for (InWorldForceGroup forceGroup : data.groups()) {
 
                 ForceGroupDisplayConfig config =
                     ClientConfig.getForceGroupConfig(
@@ -133,8 +168,8 @@ public class WorldDiagramDataRenderer {
 
             renderPreparation.diagrams.add(
                 new RenderPreparation.PreparedDiagram(
-                    cached.mass(),
-                    cached.centerOfMass(),
+                    data.massValue(),
+                    data.massPosition(),
                     preparedGroups
                 )
             );

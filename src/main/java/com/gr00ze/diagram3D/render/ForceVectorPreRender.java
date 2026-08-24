@@ -22,7 +22,7 @@ public class ForceVectorPreRender {
 
     private static void preparedMergedVectors(RenderPreparation renderPreparation, RenderPreparation.PreparedGroup preparedGroup, double directionThreshold) {
         int color = 0xFF000000 | preparedGroup.forceGroup().color();
-        List<DiagramRecords.ResolvedForce> forces = preparedGroup.forceGroup().forces();
+        List<DiagramRecords.InWorldForce> forces = preparedGroup.forceGroup().forces();
 
         Set<Integer> mergedIndices = new HashSet<>();
 
@@ -38,8 +38,8 @@ public class ForceVectorPreRender {
                 mergedForceData.positionSum()
                     .scale(1.0 / mergedForceData.count());
 
-            DiagramRecords.ResolvedForce mergedForce =
-                new DiagramRecords.ResolvedForce(
+            DiagramRecords.InWorldForce mergedForce =
+                new DiagramRecords.InWorldForce(
                     averagePosition, mergedForceData.deltaSum()
                 );
 
@@ -59,8 +59,8 @@ public class ForceVectorPreRender {
      * Merges forces with similar directions starting from the given index.
      * Already merged forces are skipped to ensure each force belongs to only one group.
      */
-    private static MergedForceData mergeForces(double directionThreshold, List<DiagramRecords.ResolvedForce> forces, int i, Set<Integer> mergedIndices) {
-        DiagramRecords.ResolvedForce force = forces.get(i);
+    private static MergedForceData mergeForces(double directionThreshold, List<DiagramRecords.InWorldForce> forces, int i, Set<Integer> mergedIndices) {
+        DiagramRecords.InWorldForce force = forces.get(i);
         Vec3 direction = force.delta().normalize();
 
         Vec3 positionSum = force.origin();
@@ -75,7 +75,7 @@ public class ForceVectorPreRender {
                 continue;
             }
 
-            DiagramRecords.ResolvedForce other = forces.get(j);
+            DiagramRecords.InWorldForce other = forces.get(j);
             Vec3 otherDirection = other.delta().normalize();
 
             if (direction.dot(otherDirection)

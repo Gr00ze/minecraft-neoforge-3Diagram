@@ -1,5 +1,9 @@
 # Changelog
 
+## V1.0.1 — Hotfix render stutter
+
+- Fixed render stutter of every moving graphic element
+
 ## V1.0.0 — Release
 
 - Fixed some alignment issues in the custom config screen

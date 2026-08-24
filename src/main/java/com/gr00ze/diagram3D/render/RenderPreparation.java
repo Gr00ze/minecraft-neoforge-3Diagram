@@ -26,7 +26,7 @@ public class RenderPreparation {
     ) {}
 
     public record PreparedGroup(
-        DiagramRecords.ResolvedForceGroup forceGroup,
+        DiagramRecords.InWorldForceGroup forceGroup,
         ForceGroupDisplayConfig config
     ) {}
 

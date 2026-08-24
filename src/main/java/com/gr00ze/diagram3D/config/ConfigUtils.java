@@ -3,7 +3,6 @@ package com.gr00ze.diagram3D.config;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.InMemoryFormat;
 import com.electronwill.nightconfig.core.UnmodifiableConfig;
-import com.gr00ze.diagram3D.data.DiagramRecords;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
@@ -14,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.gr00ze.diagram3D.config.ClientConfig.*;
+import static com.gr00ze.diagram3D.data.DiagramRecords.InWorldForceGroup;
 
 public class ConfigUtils {
 
@@ -52,7 +52,7 @@ public class ConfigUtils {
     }
 
     public static @Nullable ResourceLocation getForceGroupId(
-        DiagramRecords.ResolvedForceGroup forceGroup
+        InWorldForceGroup forceGroup
     ) {
         return getForceGroupId(forceGroup.name());
     }
