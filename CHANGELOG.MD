@@ -1,5 +1,9 @@
 # Changelog
 
+## V1.0.2 — Hotfix: crash on disassembly
+
+- Fixed a crash that occurred when disassembling a contraption.
+
 ## V1.0.1 — Hotfix render stutter
 
 - Fixed render stutter of every moving graphic element

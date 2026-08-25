@@ -11,10 +11,13 @@ import com.gr00ze.libs.RenderFunctions;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import dev.ryanhcode.sable.api.sublevel.SubLevelContainer;
+import dev.ryanhcode.sable.sublevel.SubLevel;
 import dev.simulated_team.simulated.network.packets.contraption_diagram.DiagramDataPacket;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -56,17 +59,19 @@ public class WorldDiagramDataRenderer {
 
         Minecraft mc = Minecraft.getInstance();
 
+        ClientLevel level = mc.level;
         Player player = mc.player;
-        if(player == null)
+        if(player == null || level == null)
             return;
 
         PoseStack pose = event.getPoseStack();
-        Camera camera = mc.gameRenderer.getMainCamera();
+        Camera camera = event.getCamera();
+
         MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
 
         RenderSystem.disableDepthTest();
 
-        RenderPreparation renderPreparation = prepareData(camera);
+        RenderPreparation renderPreparation = prepareData(level, camera);
 
         drawData(buffer, mc, pose, camera, renderPreparation);
 
@@ -74,11 +79,11 @@ public class WorldDiagramDataRenderer {
 
     }
 
-    private static RenderPreparation prepareData(Camera camera) {
+    private static RenderPreparation prepareData(ClientLevel level, Camera camera) {
 
 
         List<ConvertedDiagramData> convertedDiagramDataList = new ArrayList<>();
-        prepareDiagramData(convertedDiagramDataList);
+        prepareDiagramData(level, convertedDiagramDataList);
 
         RenderPreparation renderPreparation = new RenderPreparation();
         loadForceGroupConfig(convertedDiagramDataList, renderPreparation);
@@ -110,7 +115,9 @@ public class WorldDiagramDataRenderer {
         return renderPreparation;
     }
 
-    private static void prepareDiagramData(List<ConvertedDiagramData> convertedDiagramDataList) {
+    private static void prepareDiagramData(ClientLevel level, List<ConvertedDiagramData> convertedDiagramDataList) {
+        var container = SubLevelContainer.getContainer(level);
+        if (container == null) return;
 
         for (DiagramDataCache cached : diagramDataCache.values()) {
             DiagramDataPacket cachedPacked = cached.serverData();
@@ -118,6 +125,8 @@ public class WorldDiagramDataRenderer {
             long lastUpdate = cached.lastUpdate();
 
 
+            SubLevel sublevel  = container.getSubLevel(sublevelID);
+            if(sublevel == null) continue;
 
             ConvertedDiagramData convertedDiagramData =
                 new ConvertedDiagramData(
