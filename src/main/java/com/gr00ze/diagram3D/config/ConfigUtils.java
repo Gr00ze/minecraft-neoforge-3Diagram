@@ -67,11 +67,11 @@ public class ConfigUtils {
 
         String key = contents.getKey();
 
-        if (!key.startsWith("force_group.")) {
+        if (!key.contains("force_group")) {
             return null;
         }
 
-        String value = key.substring("force_group.".length());
+        String value = key.replace("force_group.", "");
 
         int separator = value.indexOf('.');
 
