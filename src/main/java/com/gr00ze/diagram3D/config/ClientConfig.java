@@ -202,9 +202,11 @@ public class ClientConfig
 
 
     }
-
+    ///
+    /// It will crash if id is null
+    ///
     public static ForceGroupDisplayConfig getForceGroupConfig(
-        ResourceLocation id
+        @NotNull ResourceLocation id
     ) {
         return FORCE_GROUP_CONFIGS.computeIfAbsent(
             id,
