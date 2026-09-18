@@ -1,5 +1,10 @@
 # Changelog
 
+## V1.0.3 — Hotfix: crash on unknown force group
+
+- Fixed a crash that occurred when at least one force group was not recognized.
+- Improved the system to recognize the force groups for other mods
+
 ## V1.0.2 — Hotfix: crash on disassembly
 
 - Fixed a crash that occurred when disassembling a contraption.
