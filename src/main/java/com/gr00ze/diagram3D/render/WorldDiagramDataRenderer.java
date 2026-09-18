@@ -162,9 +162,12 @@ public class WorldDiagramDataRenderer {
 
             for (InWorldForceGroup forceGroup : data.groups()) {
 
+                ResourceLocation forceID = ConfigUtils.getForceGroupId(forceGroup);
+
+                if(forceID == null) continue;
                 ForceGroupDisplayConfig config =
                     ClientConfig.getForceGroupConfig(
-                        ConfigUtils.getForceGroupId(forceGroup)
+                        forceID
                     );
 
                 preparedGroups.add(
